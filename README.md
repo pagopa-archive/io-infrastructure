@@ -400,42 +400,6 @@ To deploy new code to Azure Functions run:
 yarn deploy:functions:sync
 ```
 
-## Other
-
-### Building the documentation site
-
-The source of the Digital Citizenship documentation site is under the `docs`
-directory of this repository.
-
-#### Prerequisites
-
-* [Python language runtime](https://www.python.org/downloads/)
-* [Python pip](https://pip.pypa.io/en/stable/installing/)
-* [Sphinx](http://www.sphinx-doc.org/en/stable/install.html)
-
-Then install the following packages:
-
-```
-pip install recommonmark
-pip install sphinx-rtd-theme
-```
-
-#### Build the documentation
-
-To build the sphinx documentation from this repository:
-
-```
-yarn docs:build
-```
-
-#### Publish the documentation
-
-To deploy the documentation site (via GitHub pages):
-
-```
-yarn docs:publish
-```
-
 ## Troubleshooting
 
 ### Terraform
