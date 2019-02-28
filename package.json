@@ -1,21 +1,16 @@
 {
-  "name": "digital-citizenship",
+  "name": "io-infrastructure",
   "version": "0.1.0",
-  "description": "Digital Citizenship platform",
+  "description": "Infrastructure of IO",
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/teamdigitale/digital-citizenship.git"
+    "url": "https://github.com/teamdigitale/io-infrastructure.git"
   },
-  "author": "Team per la Trasformazione Digitale, AgID",
+  "author": "Team per la Trasformazione Digitale",
   "license": "MIT",
   "scripts": {
     "lint": "tslint -p . -c tslint.json",
-    "docs:build": "sphinx-build docs site",
-    "docs:nojekyll": "cp .nojekyll site",
-    "docs:api": "cp -r docs/api site",
-    "docs:deploy": "gh-pages -t -d site",
-    "docs:publish": "npm-run-all docs:build docs:nojekyll docs:api docs:deploy",
     "resources:tf-init":
       "env-cmd .env cross-var terraform init -var-file=infrastructure/env/common/tfvars.json -var-file=infrastructure/env/$ENVIRONMENT/tfvars.json -backend-config=\"infrastructure/env/$ENVIRONMENT/backend.tf\" infrastructure",
     "resources:tf-plan":
