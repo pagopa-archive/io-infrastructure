@@ -16,5 +16,6 @@
   "notification_hub_apns_endpoint":
     "https://api.development.push.apple.com:443/3/device",
   "webhook_channel_url":
-    "https://app-backend.k8s.test.cd.teamdigitale.it/api/v1/notify?token="
+    "https://app-backend.k8s.test.cd.teamdigitale.it/api/v1/notify?token=",
+  "functions_public_api_url": "https://api.cd.italia.it/"
 }

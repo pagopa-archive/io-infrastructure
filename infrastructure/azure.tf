@@ -2,7 +2,7 @@
 # Set up environment variables before running this script (see README.md)
 
 provider "azurerm" {
-  version = "~> 1.10.0"
+  version = "~> 1.22.1"
 }
 
 provider "random" {
@@ -122,18 +122,7 @@ variable "azurerm_adb2c_policy" {
 variable "ADB2C_TENANT_ID" {
   type        = "string"
   description = "Name of the Active Directory B2C tenant used in the API management portal authentication flow"
-}
-
-# TF_VAR_DEV_PORTAL_CLIENT_ID
-variable "DEV_PORTAL_CLIENT_ID" {
-  type        = "string"
-  description = "Client ID of an application used in the API management portal authentication flow"
-}
-
-# TF_VAR_DEV_PORTAL_CLIENT_SECRET
-variable "DEV_PORTAL_CLIENT_SECRET" {
-  type        = "string"
-  description = "Client secret of the application used in the API management portal authentication flow"
+  default     = "agidweb"
 }
 
 # TF_VAR_DEV_PORTAL_EXT_CLIENT_ID
@@ -151,12 +140,6 @@ variable "DEV_PORTAL_EXT_CLIENT_SECRET" {
 variable "webhook_channel_url" {
   type        = "string"
   description = "URL to contact when sending notifications to the webhook (without the secret token)"
-}
-
-# TF_VAR_WEBHOOK_CHANNEL_URL_TOKEN
-variable "WEBHOOK_CHANNEL_URL_TOKEN" {
-  type        = "string"
-  description = "Secret token that is appended to the webhook_channel_url"
 }
 
 variable "azurerm_apim_eventhub_rule" {
@@ -198,12 +181,6 @@ variable "NOTIFICATION_HUB_APNS_KEY_ID" {
   description = "APNS key Id"
 }
 
-# This should be passed by ENV var TF_VAR_NOTIFICATION_HUB_GCM_KEY
-variable "NOTIFICATION_HUB_GCM_KEY" {
-  type        = "string"
-  description = "GCM Key"
-}
-
 variable "azurerm_shared_address_space_cidr" {
   default     = "100.64.0.0/10"
   description = "Azure internal network CIDR"
@@ -213,18 +190,6 @@ variable "azurerm_shared_address_space_cidr" {
 variable "azurerm_azure_portal_ips" {
   default     = "104.42.195.92,40.76.54.131,52.176.6.30,52.169.50.45,52.187.184.26"
   description = "The IPs of the Azure admin portal"
-}
-
-# This should be passed by ENV var TF_VAR_MAILUP_USERNAME
-variable "MAILUP_USERNAME" {
-  type        = "string"
-  description = "Username for the MailUp SMTP+ service"
-}
-
-# This should be passed by ENV var TF_VAR_MAILUP_SECRET
-variable "MAILUP_SECRET" {
-  type        = "string"
-  description = "Password for the MailUp SMTP+ service"
 }
 
 variable "default_sender_email" {
@@ -273,18 +238,6 @@ variable "azurerm_dns_main_zone_spf1" {
 variable "azurerm_dns_main_zone_dkim" {
   type        = "map"
   description = "Default email provider dkim DNS records"
-}
-
-# PagoPA VPN
-
-variable "pagopa_vpn_site_gateway_ip" {
-  default     = ""
-  description = "The IP address of the pagoPA VPN gateway"
-}
-
-variable "pagopa_vpn_shared_key" {
-  default     = ""
-  description = "The shared key to be used by the pagoPA VPN"
 }
 
 #
@@ -336,6 +289,14 @@ variable "cosmosdb_iprange_provisioner" {
   default = "infrastructure/local-provisioners/azurerm_cosmosdb_iprange.ts"
 }
 
+variable "key_vault_id" {
+  default = "/subscriptions/ec285037-c673-4f58-b594-d7c480da4e8b/resourcegroups/terraform-resource-group/providers/Microsoft.KeyVault/vaults/io-key-vault"
+}
+
+variable "functions_public_api_url" {
+  default = ""
+}
+
 #
 # Compute name of resources
 #
@@ -369,6 +330,8 @@ locals {
   azurerm_redis_cache_name                 = "${var.azurerm_resource_name_prefix}-redis-${var.environment_short}"
   azurerm_redis_backup_name                = "${var.azurerm_resource_name_prefix}redisbck${var.environment_short}"
   azurerm_redis_vnet_name                  = "${var.azurerm_resource_name_prefix}-redis-vnet-${var.environment_short}"
+
+  default_functions_public_api_url         = "https://${local.azurerm_apim_name}.azure-api.net/"
 }
 
 #
@@ -378,6 +341,61 @@ locals {
 # We need the configuration of the Azure Resource Manager provider for some
 # resources that need to create other resources themselves (i.e. Kubernetes)
 data "azurerm_client_config" "current" {}
+
+# Most secrets are stored in the key vault
+
+# The IP address of the pagoPA VPN gateway
+data "azurerm_key_vault_secret" "pagopa_vpn_site_gateway_ip" {
+  name      = "pagopa-vpn-site-gateway-ip-${var.environment_short}"
+  key_vault_id = "${var.key_vault_id}"
+}
+
+# The shared key to be used by the pagoPA VPN
+data "azurerm_key_vault_secret" "pagopa_vpn_shared_key" {
+  name      = "pagopa-vpn-shared-key-${var.environment_short}"
+  key_vault_id = "${var.key_vault_id}"
+}
+
+# Username for the MailUp SMTP+ service
+data "azurerm_key_vault_secret" "mailup_username" {
+  name      = "mailup-username-${var.environment_short}"
+  key_vault_id = "${var.key_vault_id}"
+}
+
+# Password for the MailUp SMTP+ service
+data "azurerm_key_vault_secret" "mailup_secret" {
+  name      = "mailup-secret-${var.environment_short}"
+  key_vault_id = "${var.key_vault_id}"
+}
+
+# Secret token that is appended to the webhook_channel_url
+data "azurerm_key_vault_secret" "webhook_channel_url_token" {
+  name      = "webhook-channel-url-token-${var.environment_short}"
+  key_vault_id = "${var.key_vault_id}"
+}
+
+# Client ID of an application used in the API management portal authentication flow
+data "azurerm_key_vault_secret" "dev_portal_client_id" {
+  name      = "dev-portal-client-id-${var.environment_short}"
+  key_vault_id = "${var.key_vault_id}"
+}
+
+# Client secret of the application used in the API management portal authentication flow
+data "azurerm_key_vault_secret" "dev_portal_client_secret" {
+  name      = "dev-portal-client-secret-${var.environment_short}"
+  key_vault_id = "${var.key_vault_id}"
+}
+
+# GCM Key
+data "azurerm_key_vault_secret" "notification_hub_gcm_key" {
+  name      = "notification-hub-gcm-key-${var.environment_short}"
+  key_vault_id = "${var.key_vault_id}"
+}
+
+data "azurerm_key_vault_secret" "functions_public_api_key" {
+  name      = "functions-public-api-key-${var.environment_short}"
+  key_vault_id = "${var.key_vault_id}"
+}
 
 ## RESOURCE GROUP
 
@@ -505,10 +523,10 @@ resource "azurerm_cosmosdb_account" "azurerm_cosmosdb" {
     consistency_level = "Session"
   }
 
-  geo_location {
-    location          = "${var.cosmosdb_failover_location}"
-    failover_priority = 0
-  }
+  # geo_location {
+  #   location          = "${var.cosmosdb_failover_location}"
+  #   failover_priority = 0
+  # }
 
   # ip_range_filter = "${azurerm_function_app.azurerm_function_app.outbound_ip_addresses}"
 
@@ -591,6 +609,8 @@ resource "azurerm_function_app" "azurerm_function_app" {
     always_on = true
   }
 
+  enable_builtin_logging = false
+
   # Do not set "AzureWebJobsDashboard" to disable builtin logging
   # see https://docs.microsoft.com/en-us/azure/azure-functions/functions-monitoring#disable-built-in-logging
 
@@ -621,20 +641,21 @@ resource "azurerm_function_app" "azurerm_function_app" {
 
     "MESSAGE_CONTAINER_NAME" = "${azurerm_storage_blob.azurerm_message_blob.name}"
 
-    "MAILUP_USERNAME" = "${var.MAILUP_USERNAME}"
+    "MAILUP_USERNAME" = "${data.azurerm_key_vault_secret.mailup_username.value}"
 
-    "MAILUP_SECRET" = "${var.MAILUP_SECRET}"
+    "MAILUP_SECRET" = "${data.azurerm_key_vault_secret.mailup_secret.value}"
 
     "MAIL_FROM_DEFAULT" = "${var.default_sender_email}"
 
-    "WEBHOOK_CHANNEL_URL" = "${var.webhook_channel_url}${var.WEBHOOK_CHANNEL_URL_TOKEN}"
+    "WEBHOOK_CHANNEL_URL" = "${var.webhook_channel_url}${data.azurerm_key_vault_secret.webhook_channel_url_token.value}"
 
-    "PUBLIC_API_URL" = "https://${local.azurerm_apim_name}.azure-api.net/"
+    "PUBLIC_API_URL" = "${coalesce(var.functions_public_api_url, local.default_functions_public_api_url)}"
 
     # API management API-Key (Ocp-Apim-Subscription-Key)
     # set the value manually or with a local provisioner
-    "PUBLIC_API_KEY" = ""
+    "PUBLIC_API_KEY" = "${data.azurerm_key_vault_secret.functions_public_api_key.value}"
   }
+
   connection_string = [
     {
       name  = "COSMOSDB_KEY"
@@ -732,7 +753,7 @@ resource "azurerm_app_service" "azurerm_app_service_portal" {
     WEBSITE_NODE_DEFAULT_VERSION = "6.5.0"
     COOKIE_KEY                   = "${random_string.cookie_key.result}"
     COOKIE_IV                    = "${random_string.cookie_iv.result}"
-    LOG_LEVEL                    = "info"
+    LOG_LEVEL                    = "debug"
     ARM_RESOURCE_GROUP           = "${azurerm_resource_group.azurerm_resource_group.name}"
     ARM_APIM                     = "${local.azurerm_apim_name}"
     APIM_PRODUCT_NAME            = "starter"
@@ -845,7 +866,7 @@ resource "azurerm_log_analytics_workspace" "azurerm_log_analytics" {
   name                = "${local.azurerm_log_analytics_name}"
   location            = "${azurerm_resource_group.azurerm_resource_group.location}"
   resource_group_name = "${azurerm_resource_group.azurerm_resource_group.name}"
-  sku                 = "Standard"
+  sku                 = "pernode"
   retention_in_days   = 30
 }
 
@@ -903,7 +924,7 @@ resource "null_resource" "azurerm_notification_hub" {
       "--notification_hub_apns_endpoint ${var.notification_hub_apns_endpoint}",
       "--notification_hub_apns_key ${var.NOTIFICATION_HUB_APNS_KEY}",
       "--notification_hub_apns_key_id ${var.NOTIFICATION_HUB_APNS_KEY_ID}",
-      "--notification_hub_gcm_key ${var.NOTIFICATION_HUB_GCM_KEY}",
+      "--notification_hub_gcm_key ${data.azurerm_key_vault_secret.notification_hub_gcm_key.value}",
       "--azurerm_notification_hub ${local.azurerm_notification_hub}"))
     }"
   }
@@ -953,8 +974,8 @@ resource "null_resource" "azurerm_apim_adb2c" {
       "--azurerm_apim ${local.azurerm_apim_name}",
       "--apim_configuration_path ${var.apim_configuration_path}",
       "--adb2c_tenant_id ${var.ADB2C_TENANT_ID}",
-      "--adb2c_portal_client_id ${var.DEV_PORTAL_CLIENT_ID}",
-      "--adb2c_portal_client_secret ${var.DEV_PORTAL_CLIENT_SECRET}"))
+      "--adb2c_portal_client_id ${data.azurerm_key_vault_secret.dev_portal_client_id.value}",
+      "--adb2c_portal_client_secret ${data.azurerm_key_vault_secret.dev_portal_client_secret.value}"))
     }"
   }
 }
@@ -1050,6 +1071,9 @@ resource "azurerm_dns_cname_record" "azurerm_dns_main_zone_dkim" {
 # Redis cache
 #
 resource "azurerm_storage_account" "azurerm_redis_backup" {
+  # currently disabled for test environment as the application uses agid-redis-dev
+  count = "${var.environment == "test" ? 0 : 1}"
+
   name                = "${local.azurerm_redis_backup_name}"
   resource_group_name = "${azurerm_resource_group.azurerm_resource_group.name}"
   location            = "${azurerm_resource_group.azurerm_resource_group.location}"
@@ -1064,6 +1088,9 @@ resource "azurerm_storage_account" "azurerm_redis_backup" {
 }
 
 resource "azurerm_redis_cache" "azurerm_redis_cache" {
+  # currently disabled for test environment as the application uses agid-redis-dev
+  count = "${var.environment == "test" ? 0 : 1}"
+
   name                = "${local.azurerm_redis_cache_name}"
   location            = "${azurerm_resource_group.azurerm_resource_group.location}"
   resource_group_name = "${azurerm_resource_group.azurerm_resource_group.name}"
@@ -1111,6 +1138,9 @@ resource "azurerm_redis_cache" "azurerm_redis_cache" {
 
 # Virtual network needed to deploy redis cache
 resource "azurerm_virtual_network" "azurerm_redis_cache" {
+  # currently disabled for test environment as the application uses agid-redis-dev
+  count = "${var.environment == "test" ? 0 : 1}"
+
   name                = "${local.azurerm_redis_vnet_name}"
   location            = "${azurerm_resource_group.azurerm_resource_group.location}"
   resource_group_name = "${azurerm_resource_group.azurerm_resource_group.name}"
@@ -1122,6 +1152,9 @@ resource "azurerm_virtual_network" "azurerm_redis_cache" {
 }
 
 data "azurerm_subnet" "azurerm_redis_cache" {
+  # currently disabled for test environment as the application uses agid-redis-dev
+  count = "${var.environment == "test" ? 0 : 1}"
+
   name                 = "default"
   virtual_network_name = "${local.azurerm_redis_vnet_name}"
   resource_group_name  = "${azurerm_resource_group.azurerm_resource_group.name}"
@@ -1129,6 +1162,9 @@ data "azurerm_subnet" "azurerm_redis_cache" {
 
 # Peering from the Redis Cache VNet to the AKS agent VNet
 resource "azurerm_virtual_network_peering" "redis_to_aks" {
+  # currently disabled for test environment as the application uses agid-redis-dev
+  count = "${var.environment == "test" ? 0 : 1}"
+
   name                         = "RedisToAks"
   resource_group_name          = "${azurerm_resource_group.azurerm_resource_group.name}"
   virtual_network_name         = "${azurerm_virtual_network.azurerm_redis_cache.name}"
@@ -1146,6 +1182,9 @@ resource "azurerm_virtual_network_peering" "redis_to_aks" {
 
 # Peering from the AKS agent VNet to the Redis Cache VNet
 resource "azurerm_virtual_network_peering" "aks_to_redis" {
+  # currently disabled for test environment as the application uses agid-redis-dev
+  count = "${var.environment == "test" ? 0 : 1}"
+
   name                         = "AksToRedis"
   resource_group_name          = "${module.kubernetes.aks_rg_name}"
   virtual_network_name         = "${module.kubernetes.aks_vnet_name}"
@@ -1221,8 +1260,8 @@ module "pagopa_vpn" {
   environment_short            = "${var.environment_short}"
   resource_group_location      = "${azurerm_resource_group.azurerm_resource_group.location}"
   resource_group_name          = "${azurerm_resource_group.azurerm_resource_group.name}"
-  site_gateway_address         = "${var.pagopa_vpn_site_gateway_ip}"
-  vpn_shared_key               = "${var.pagopa_vpn_shared_key}"
+  site_gateway_address         = "${data.azurerm_key_vault_secret.pagopa_vpn_site_gateway_ip.value}"
+  vpn_shared_key               = "${data.azurerm_key_vault_secret.pagopa_vpn_shared_key.value}"
   aks_rg_name                  = "${module.kubernetes.aks_rg_name}"
   aks_vnet_id                  = "${module.kubernetes.aks_vnet_id}"
   aks_vnet_name                = "${module.kubernetes.aks_vnet_name}"
