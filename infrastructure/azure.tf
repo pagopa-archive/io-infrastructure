@@ -523,6 +523,7 @@ resource "azurerm_cosmosdb_account" "azurerm_cosmosdb" {
     consistency_level = "Session"
   }
 
+  # TODO: enable only for production
   # geo_location {
   #   location          = "${var.cosmosdb_failover_location}"
   #   failover_priority = 0
