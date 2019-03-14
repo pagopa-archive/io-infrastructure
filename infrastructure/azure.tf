@@ -935,6 +935,24 @@ resource "null_resource" "azurerm_notification_hub" {
 
 ## Create and configure the API management service
 
+
+resource "azurerm_api_management" "azurerm_apim" {
+  name                = "${local.azurerm_apim_name}"
+  location            = "${azurerm_resource_group.azurerm_resource_group.location}"
+  resource_group_name = "${azurerm_resource_group.azurerm_resource_group.name}"
+  publisher_name      = "Digital Citizenship"
+  publisher_email     = "apim@agid.gov.it"
+  notification_sender_email = "apim@agid.gov.it"
+
+  sku {
+    name     = "${var.azurerm_apim_sku}"
+    capacity = 1
+  }
+
+  hostname_configuration {
+  }
+}
+
 resource "null_resource" "azurerm_apim" {
   triggers = {
     azurerm_function_app_id     = "${azurerm_function_app.azurerm_function_app.id}"
@@ -947,7 +965,8 @@ resource "null_resource" "azurerm_apim" {
       "ts-node ${var.apim_provisioner}",
       "--environment ${var.environment}",
       "--azurerm_resource_group ${azurerm_resource_group.azurerm_resource_group.name}",
-      "--azurerm_apim ${local.azurerm_apim_name}",
+      "--azurerm_apim ${azurerm_api_management.azurerm_apim.name}",
+      "--azurerm_apim_scm_url ${azurerm_api_management.azurerm_apim.scm_url}",
       "--azurerm_functionapp ${azurerm_function_app.azurerm_function_app.name}",
       "--azurerm_app_service_portal ${local.azurerm_app_service_portal_name}",
       "--apim_configuration_path ${var.apim_configuration_path}"))

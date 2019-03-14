@@ -62,6 +62,7 @@ interface IApimProperties {
 const ApimParams = t.interface({
   apim_configuration_path: t.string,
   azurerm_apim: t.string,
+  azurerm_apim_scm_url: t.string,
   azurerm_functionapp: t.string,
   azurerm_resource_group: t.string,
   environment: t.string
@@ -148,7 +149,6 @@ const setupProperties = async (
  */
 const setupConfigurationFromGit = async (
   apiClient: apiManagementClient,
-  scmUrl: string,
   configurationDirectoryPath: string,
   config: ResourcesConfiguration,
   params: ApimParams
@@ -168,7 +168,7 @@ const setupConfigurationFromGit = async (
   );
 
   // Build Git URL with user and password
-  const { hostname, protocol } = url.parse(scmUrl);
+  const { hostname, protocol } = url.parse(params.azurerm_apim_scm_url);
   const scmUrlWithCreds = url.format({
     ...{ hostname, protocol },
     auth: `${config.apim_scm_username}:${gitKey.value}`
@@ -244,31 +244,6 @@ const getPropsFromFunctions = async (
   };
 };
 
-/**
- * Creates the API management PaaS
- */
-const createOrUpdateApiManagementService = async (
-  apiClient: apiManagementClient,
-  config: ResourcesConfiguration,
-  params: ApimParams
-) => {
-  winston.info(
-    "Create API management resource, this takes a while (about 30 minutes)..."
-  );
-  const apiManagementService = await apiClient.apiManagementService.createOrUpdate(
-    params.azurerm_resource_group,
-    params.azurerm_apim,
-    {
-      location: config.location,
-      notificationSenderEmail: config.apim_email,
-      publisherEmail: config.apim_email,
-      publisherName: config.apim_publisher,
-      sku: { name: config.azurerm_apim_sku, capacity: 1 }
-    }
-  );
-  return apiManagementService;
-};
-
 export const run = async (params: ApimParams) => {
   const config = readConfig(
     params.environment,
@@ -289,16 +264,6 @@ export const run = async (params: ApimParams) => {
 
   const functionProperties = await getPropsFromFunctions(loginCreds, params);
 
-  const apiManagementService = await createOrUpdateApiManagementService(
-    apiClient,
-    config,
-    params
-  );
-
-  if (!apiManagementService.scmUrl) {
-    throw new Error("Cannot get apiManagementService.scmUrl");
-  }
-
   // Set up backend url and code (master key) named values
   // to access Functions endpoint in policies
   await setupProperties(apiClient, params, functionProperties);
@@ -306,7 +271,6 @@ export const run = async (params: ApimParams) => {
   // Push API management configuration from local repository
   await setupConfigurationFromGit(
     apiClient,
-    apiManagementService.scmUrl,
     CONFIGURATION_DIRECTORY_PATH,
     config,
     params
@@ -322,6 +286,9 @@ const argv = yargs
     string: true
   })
   .option("azurerm_apim", {
+    string: true
+  })
+  .option("azurerm_apim_scm_url", {
     string: true
   })
   .option("azurerm_functionapp", {
