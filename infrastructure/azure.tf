@@ -769,9 +769,20 @@ resource "azurerm_app_service" "azurerm_app_service_portal" {
     CLIENT_ID           = "${var.DEV_PORTAL_EXT_CLIENT_ID}"
     CLIENT_SECRET       = "${var.DEV_PORTAL_EXT_CLIENT_SECRET}"
 
+    APPINSIGHTS_PORTALINFO = "Node"
+    WEBSITE_DISABLE_MSI    = "false"
+
     # Prevent Terraform to override these values
     APPINSIGHTS_INSTRUMENTATIONKEY = ""
     ADMIN_API_KEY                  = ""
+  }
+
+  lifecycle {
+    ignore_changes = [
+      # FIXME: this is configured on the Azure portal as "External Git" but the
+      #        Azure provider supports only "None" and "Local Git"
+      "site_config.0.scm_type"
+    ]
   }
 }
 
