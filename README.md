@@ -44,3 +44,24 @@ All binaries must be in the system path.
 ### Other Tasks
 
 * [First time set up of the Azure Active Directory B2C tenant](docs/azure-initial-setup.md)
+
+### Managing permissons of APIM users
+
+Permissions are granted to API users by assigning them to Groups. Each group
+grants a permission to do something on the API. The updated list of available
+permissions can be found in the [API authentication middleware](https://github.com/teamdigitale/io-functions/blob/master/lib/utils/middlewares/azure_api_auth.ts#L26).
+
+To add or remove APIM users to groups, you can use the `apim-users` script.
+
+To add a user to some groups:
+
+```bash
+$ yarn apim-users --apim=agid-apim-prod --resource-group=agid-rg-prod --email=user@example.com --add-groups=ApiLimitedProfileRead,ApiInfoRead
+```
+
+To remove a user from some groups:
+
+```bash
+$ yarn apim-users --apim=agid-apim-prod --resource-group=agid-rg-prod --email=user@example.com --remove-groups=ApiLimitedProfileRead,ApiInfoRead
+```
+
