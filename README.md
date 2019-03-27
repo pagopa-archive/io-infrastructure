@@ -56,12 +56,43 @@ To add or remove APIM users to groups, you can use the `apim-users` script.
 To add a user to some groups:
 
 ```bash
-$ yarn apim-users --apim=agid-apim-prod --resource-group=agid-rg-prod --email=user@example.com --add-groups=ApiLimitedProfileRead,ApiInfoRead
+$ yarn apim-users \
+  --apim=agid-apim-prod \
+  --resource-group=agid-rg-prod \
+  --email=user@example.com \
+  --add-groups=ApiLimitedProfileRead,ApiInfoRead
 ```
 
 To remove a user from some groups:
 
 ```bash
-$ yarn apim-users --apim=agid-apim-prod --resource-group=agid-rg-prod --email=user@example.com --remove-groups=ApiLimitedProfileRead,ApiInfoRead
+$ yarn apim-users \
+  --apim=agid-apim-prod \
+  --resource-group=agid-rg-prod \
+  --email=user@example.com \
+  --remove-groups=ApiLimitedProfileRead,ApiInfoRead
 ```
 
+#### Display current groups for a user
+
+```bash
+$ yarn apim-users \
+  --apim=agid-apim-prod \
+  --resource-group=agid-rg-prod \
+  --email=APIM_USER_EMAIL
+```
+
+#### Enable a user to send messages to any recipient
+
+By default APIM users are restricted to send messages only to their assigned
+test recipient. Run the following command to remove the restriction and allow
+them to send messages to any recipient.
+
+```bash
+$ yarn apim-users \
+  --apim=agid-apim-prod \
+  --resource-group=agid-rg-prod \
+  --add-groups=ApiMessageWrite \
+  --remove-groups=ApiLimitedMessageWrite \
+  --email=APIM_USER_EMAIL
+```
