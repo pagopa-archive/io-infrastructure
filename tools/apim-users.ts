@@ -80,7 +80,8 @@ export const run = async (params: TaskParams) => {
         await apiClient.groupUser.create(
           params["resource-group"],
           params.apim,
-          g,
+          // group id is group name in lower case
+          g.toLowerCase(),
           uid
         );
       })
@@ -96,7 +97,8 @@ export const run = async (params: TaskParams) => {
         await apiClient.groupUser.deleteMethod(
           params["resource-group"],
           params.apim,
-          g,
+          // group id is group name in lower case
+          g.toLowerCase(),
           uid
         );
       })
