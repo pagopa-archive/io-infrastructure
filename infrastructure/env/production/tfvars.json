@@ -11,5 +11,6 @@
   "azurerm_kubernetes_agent_vm_size": "Standard_D3",
   "azurerm_notification_hub_sku": "Standard",
   "webhook_channel_url":
-    "https://app-backend.k8s.prod.cd.teamdigitale.it/api/v1/notify?token="
+    "https://app-backend.k8s.prod.cd.teamdigitale.it/api/v1/notify?token=",
+  "functions_public_api_url": "https://api.cd.italia.it/"
 }
