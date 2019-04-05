@@ -2,7 +2,7 @@
 # Set up environment variables before running this script (see README.md)
 
 provider "azurerm" {
-  version = "~> 1.22.1"
+  version = "~> 1.24"
 }
 
 provider "random" {
