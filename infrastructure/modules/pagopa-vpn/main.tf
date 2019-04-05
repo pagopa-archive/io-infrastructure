@@ -101,10 +101,10 @@ resource "azurerm_public_ip" "default" {
   # only create when enable == "true"
   count = "${var.enable == "true" ? 1 : 0}"
 
-  name                         = "${local.public_ip_name}"
-  location                     = "${var.resource_group_location}"
-  resource_group_name          = "${var.resource_group_name}"
-  public_ip_address_allocation = "Dynamic"
+  name                = "${local.public_ip_name}"
+  location            = "${var.resource_group_location}"
+  resource_group_name = "${var.resource_group_name}"
+  allocation_method   = "Dynamic"
 
   tags {
     environment = "${var.environment}"

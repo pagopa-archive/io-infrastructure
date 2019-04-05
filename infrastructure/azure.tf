@@ -1258,10 +1258,10 @@ module "kubernetes" {
 #
 
 resource "azurerm_public_ip" "azurerm_kubernetes_public_ip" {
-  name                         = "${local.azurerm_kubernetes_public_ip_name}"
-  location                     = "${azurerm_resource_group.azurerm_resource_group.location}"
-  resource_group_name          = "${azurerm_resource_group.azurerm_resource_group.name}"
-  public_ip_address_allocation = "static"
+  name                = "${local.azurerm_kubernetes_public_ip_name}"
+  location            = "${azurerm_resource_group.azurerm_resource_group.location}"
+  resource_group_name = "${azurerm_resource_group.azurerm_resource_group.name}"
+  allocation_method   = "Static"
 
   tags {
     environment = "${var.environment}"
