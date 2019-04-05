@@ -1,7 +1,7 @@
 {
   "environment": "test",
   "environment_short": "test",
-  "location": "West Europe",
+  "location": "westeurope",
   "cosmosdb_failover_location": "North Europe",
   "app_service_portal_post_login_url":
     "https://agid-apim-test.portal.azure-api.net/developer",
