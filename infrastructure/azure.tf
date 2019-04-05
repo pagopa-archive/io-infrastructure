@@ -23,12 +23,12 @@ terraform {
   }
 }
 
-variable environment {
+variable "environment" {
   type        = "string"
   description = "Environment: production or test"
 }
 
-variable environment_short {
+variable "environment_short" {
   type        = "string"
   description = "Short version of environment name: prod or test (used in resource names)"
 }
@@ -38,7 +38,7 @@ variable "azurerm_resource_name_prefix" {
   description = "Prefix for naming resources (e.g. 'myorg')"
 }
 
-variable location {
+variable "location" {
   type        = "string"
   description = "Location of the Azure resource group and services (ie. West Europe)"
 }
@@ -307,35 +307,35 @@ variable "functions_public_api_url" {
 locals {
   # Define resource names based on the following convention:
   # {azurerm_resource_name_prefix}-RESOURCE_TYPE-{environment_short}
-  azurerm_resource_group_name = "${var.azurerm_resource_name_prefix}-rg-${var.environment_short}"
+  azurerm_resource_group_name               = "${var.azurerm_resource_name_prefix}-rg-${var.environment_short}"
 
-  azurerm_storage_account_name             = "${var.azurerm_resource_name_prefix}storage${var.environment_short}"
-  azurerm_storage_container_name           = "${var.azurerm_resource_name_prefix}-storage-${var.environment_short}"
-  azurerm_cosmosdb_name                    = "${var.azurerm_resource_name_prefix}-cosmosdb-${var.environment_short}"
-  azurerm_cosmosdb_documentdb_name         = "${var.azurerm_resource_name_prefix}-documentdb-${var.environment_short}"
-  azurerm_app_service_plan_name            = "${var.azurerm_resource_name_prefix}-app-${var.environment_short}"
-  azurerm_functionapp_name                 = "${var.azurerm_resource_name_prefix}-functions-${var.environment_short}"
-  azurerm_functionapp_storage_account_name = "${var.azurerm_resource_name_prefix}funcstorage${var.environment_short}"
-  azurerm_application_insights_name        = "${var.azurerm_resource_name_prefix}-appinsights-${var.environment_short}"
-  azurerm_app_service_plan_portal_name     = "${var.azurerm_resource_name_prefix}-portal-app-${var.environment_short}"
-  azurerm_app_service_portal_name          = "${var.azurerm_resource_name_prefix}-portal-${var.environment_short}"
-  azurerm_log_analytics_name               = "${var.azurerm_resource_name_prefix}-loganalytics-${var.environment_short}"
-  azurerm_apim_name                        = "${var.azurerm_resource_name_prefix}-apim-${var.environment_short}"
-  azurerm_eventhub_ns_name                 = "${var.azurerm_resource_name_prefix}-eventhub-ns-${var.environment_short}"
-  azurerm_apim_eventhub_name               = "${var.azurerm_resource_name_prefix}-apim-eventhub-${var.environment_short}"
-  azurerm_notification_hub                 = "${var.azurerm_resource_name_prefix}-notificationhub-${var.environment_short}"
-  azurerm_notification_hub_ns              = "${var.azurerm_resource_name_prefix}-notificationhubns-${var.environment_short}"
-  azurerm_kubernetes_name                  = "${var.azurerm_resource_name_prefix}-k8s-${var.environment_short}"
-  azurerm_kubernetes_public_ip_name        = "${var.azurerm_resource_name_prefix}-k8s-ip-${var.environment_short}"
-  azurerm_redis_cache_name                 = "${var.azurerm_resource_name_prefix}-redis-${var.environment_short}"
-  azurerm_redis_backup_name                = "${var.azurerm_resource_name_prefix}redisbck${var.environment_short}"
-  azurerm_redis_vnet_name                  = "${var.azurerm_resource_name_prefix}-redis-vnet-${var.environment_short}"
+  azurerm_storage_account_name              = "${var.azurerm_resource_name_prefix}storage${var.environment_short}"
+  azurerm_storage_container_name            = "${var.azurerm_resource_name_prefix}-storage-${var.environment_short}"
+  azurerm_cosmosdb_name                     = "${var.azurerm_resource_name_prefix}-cosmosdb-${var.environment_short}"
+  azurerm_cosmosdb_documentdb_name          = "${var.azurerm_resource_name_prefix}-documentdb-${var.environment_short}"
+  azurerm_app_service_plan_name             = "${var.azurerm_resource_name_prefix}-app-${var.environment_short}"
+  azurerm_functionapp_name                  = "${var.azurerm_resource_name_prefix}-functions-${var.environment_short}"
+  azurerm_functionapp_storage_account_name  = "${var.azurerm_resource_name_prefix}funcstorage${var.environment_short}"
+  azurerm_application_insights_name         = "${var.azurerm_resource_name_prefix}-appinsights-${var.environment_short}"
+  azurerm_app_service_plan_portal_name      = "${var.azurerm_resource_name_prefix}-portal-app-${var.environment_short}"
+  azurerm_app_service_portal_name           = "${var.azurerm_resource_name_prefix}-portal-${var.environment_short}"
+  azurerm_log_analytics_name                = "${var.azurerm_resource_name_prefix}-loganalytics-${var.environment_short}"
+  azurerm_apim_name                         = "${var.azurerm_resource_name_prefix}-apim-${var.environment_short}"
+  azurerm_eventhub_ns_name                  = "${var.azurerm_resource_name_prefix}-eventhub-ns-${var.environment_short}"
+  azurerm_apim_eventhub_name                = "${var.azurerm_resource_name_prefix}-apim-eventhub-${var.environment_short}"
+  azurerm_notification_hub                  = "${var.azurerm_resource_name_prefix}-notificationhub-${var.environment_short}"
+  azurerm_notification_hub_ns               = "${var.azurerm_resource_name_prefix}-notificationhubns-${var.environment_short}"
+  azurerm_kubernetes_name                   = "${var.azurerm_resource_name_prefix}-k8s-${var.environment_short}"
+  azurerm_kubernetes_public_ip_name         = "${var.azurerm_resource_name_prefix}-k8s-ip-${var.environment_short}"
+  azurerm_redis_cache_name                  = "${var.azurerm_resource_name_prefix}-redis-${var.environment_short}"
+  azurerm_redis_backup_name                 = "${var.azurerm_resource_name_prefix}redisbck${var.environment_short}"
+  azurerm_redis_vnet_name                   = "${var.azurerm_resource_name_prefix}-redis-vnet-${var.environment_short}"
 
   # This is hardcoded, since it's generated by Azure when
   # the Kubernetes cluster is created
   azurerm_resource_group_kubernetes_rg_name = "MC_${local.azurerm_resource_group_name}_${local.azurerm_kubernetes_name}_${var.location}"
 
-  default_functions_public_api_url         = "https://${local.azurerm_apim_name}.azure-api.net/"
+  default_functions_public_api_url          = "https://${local.azurerm_apim_name}.azure-api.net/"
 }
 
 #
@@ -354,58 +354,58 @@ data "azurerm_resource_group" "k8s_rg" {
 
 # The IP address of the pagoPA VPN gateway
 data "azurerm_key_vault_secret" "pagopa_vpn_site_gateway_ip" {
-  name      = "pagopa-vpn-site-gateway-ip-${var.environment_short}"
+  name         = "pagopa-vpn-site-gateway-ip-${var.environment_short}"
   key_vault_id = "${var.key_vault_id}"
 }
 
 # The shared key to be used by the pagoPA VPN
 data "azurerm_key_vault_secret" "pagopa_vpn_shared_key" {
-  name      = "pagopa-vpn-shared-key-${var.environment_short}"
+  name         = "pagopa-vpn-shared-key-${var.environment_short}"
   key_vault_id = "${var.key_vault_id}"
 }
 
 # Username for the MailUp SMTP+ service
 data "azurerm_key_vault_secret" "mailup_username" {
-  name      = "mailup-username-${var.environment_short}"
+  name         = "mailup-username-${var.environment_short}"
   key_vault_id = "${var.key_vault_id}"
 }
 
 # Password for the MailUp SMTP+ service
 data "azurerm_key_vault_secret" "mailup_secret" {
-  name      = "mailup-secret-${var.environment_short}"
+  name         = "mailup-secret-${var.environment_short}"
   key_vault_id = "${var.key_vault_id}"
 }
 
 # Secret token that is appended to the webhook_channel_url
 data "azurerm_key_vault_secret" "webhook_channel_url_token" {
-  name      = "webhook-channel-url-token-${var.environment_short}"
+  name         = "webhook-channel-url-token-${var.environment_short}"
   key_vault_id = "${var.key_vault_id}"
 }
 
 # Client ID of an application used in the API management portal authentication flow
 data "azurerm_key_vault_secret" "dev_portal_client_id" {
-  name      = "dev-portal-client-id-${var.environment_short}"
+  name         = "dev-portal-client-id-${var.environment_short}"
   key_vault_id = "${var.key_vault_id}"
 }
 
 # Client secret of the application used in the API management portal authentication flow
 data "azurerm_key_vault_secret" "dev_portal_client_secret" {
-  name      = "dev-portal-client-secret-${var.environment_short}"
+  name         = "dev-portal-client-secret-${var.environment_short}"
   key_vault_id = "${var.key_vault_id}"
 }
 
 # GCM Key
 data "azurerm_key_vault_secret" "notification_hub_gcm_key" {
-  name      = "notification-hub-gcm-key-${var.environment_short}"
+  name         = "notification-hub-gcm-key-${var.environment_short}"
   key_vault_id = "${var.key_vault_id}"
 }
 
 data "azurerm_key_vault_secret" "functions_public_api_key" {
-  name      = "functions-public-api-key-${var.environment_short}"
+  name         = "functions-public-api-key-${var.environment_short}"
   key_vault_id = "${var.key_vault_id}"
 }
 
-## RESOURCE GROUP
+# Resource Group
 
 # Create a resource group if it doesn’t exist
 resource "azurerm_resource_group" "azurerm_resource_group" {
@@ -417,21 +417,21 @@ resource "azurerm_resource_group" "azurerm_resource_group" {
   }
 }
 
-## STORAGE
+# Storage
 
 resource "azurerm_storage_account" "azurerm_storage_account" {
-  name                = "${local.azurerm_storage_account_name}"
-  resource_group_name = "${azurerm_resource_group.azurerm_resource_group.name}"
-  location            = "${azurerm_resource_group.azurerm_resource_group.location}"
+  name                      = "${local.azurerm_storage_account_name}"
+  resource_group_name       = "${azurerm_resource_group.azurerm_resource_group.name}"
+  location                  = "${azurerm_resource_group.azurerm_resource_group.location}"
 
   # can be one between Premium_LRS, Standard_GRS, Standard_LRS, Standard_RAGRS, Standard_ZRS
   # see https://docs.microsoft.com/en-us/azure/storage/common/storage-redundancy
-  account_tier = "Standard"
+  account_tier              = "Standard"
 
-  account_replication_type = "GRS"
+  account_replication_type  = "GRS"
 
   # see https://docs.microsoft.com/en-us/azure/storage/common/storage-service-encryption
-  enable_blob_encryption = true
+  enable_blob_encryption    = true
 
   enable_https_traffic_only = true
 
@@ -441,18 +441,18 @@ resource "azurerm_storage_account" "azurerm_storage_account" {
 }
 
 resource "azurerm_storage_account" "azurerm_functionapp_storage_account" {
-  name                = "${local.azurerm_functionapp_storage_account_name}"
-  resource_group_name = "${azurerm_resource_group.azurerm_resource_group.name}"
-  location            = "${azurerm_resource_group.azurerm_resource_group.location}"
+  name                      = "${local.azurerm_functionapp_storage_account_name}"
+  resource_group_name       = "${azurerm_resource_group.azurerm_resource_group.name}"
+  location                  = "${azurerm_resource_group.azurerm_resource_group.location}"
 
   # can be one between Premium_LRS, Standard_GRS, Standard_LRS, Standard_RAGRS, Standard_ZRS
   # see https://docs.microsoft.com/en-us/azure/storage/common/storage-redundancy
-  account_tier = "Standard"
+  account_tier              = "Standard"
 
-  account_replication_type = "GRS"
+  account_replication_type  = "GRS"
 
   # see https://docs.microsoft.com/en-us/azure/storage/common/storage-service-encryption
-  enable_blob_encryption = true
+  enable_blob_encryption    = true
 
   enable_https_traffic_only = true
 
@@ -470,7 +470,7 @@ resource "azurerm_storage_container" "azurerm_storage_container" {
   container_access_type = "private"
 }
 
-## QUEUES
+# Queues
 
 resource "azurerm_storage_queue" "azurerm_storage_queue_emailnotifications" {
   name                 = "${var.azurerm_storage_queue_emailnotifications}"
@@ -496,7 +496,7 @@ resource "azurerm_storage_queue" "azurerm_storage_queue_profileevents" {
   storage_account_name = "${azurerm_storage_account.azurerm_storage_account.name}"
 }
 
-## BLOBS
+# Blobs
 
 resource "azurerm_storage_blob" "azurerm_message_blob" {
   name = "${var.message_blob_container}"
@@ -508,7 +508,7 @@ resource "azurerm_storage_blob" "azurerm_message_blob" {
   type = "block"
 }
 
-## DATABASE
+# Database
 
 resource "azurerm_cosmosdb_account" "azurerm_cosmosdb" {
   name                = "${local.azurerm_cosmosdb_name}"
@@ -516,10 +516,10 @@ resource "azurerm_cosmosdb_account" "azurerm_cosmosdb" {
   resource_group_name = "${azurerm_resource_group.azurerm_resource_group.name}"
 
   # Possible values are GlobalDocumentDB and MongoDB
-  kind = "GlobalDocumentDB"
+  kind                = "GlobalDocumentDB"
 
   # Required - can be only set to Standard
-  offer_type = "Standard"
+  offer_type          = "Standard"
 
   # Can be either BoundedStaleness, Eventual, Session or Strong
   # see https://docs.microsoft.com/en-us/azure/cosmos-db/consistency-levels
@@ -546,13 +546,13 @@ resource "azurerm_cosmosdb_account" "azurerm_cosmosdb" {
 
 resource "null_resource" "azurerm_cosmosdb_collections" {
   triggers = {
-    cosmosdb_id = "${azurerm_cosmosdb_account.azurerm_cosmosdb.id}"
+    cosmosdb_id         = "${azurerm_cosmosdb_account.azurerm_cosmosdb.id}"
 
     # serialize the collection data to json so that the provisioner will be
     # triggered when collections get added or changed
     # NOTE: when a collection gets removed from the config it will NOT be
     # removed by the provisioner (the provisioner only creates collections)
-    collections_json = "${jsonencode(var.azurerm_cosmosdb_collections)}"
+    collections_json    = "${jsonencode(var.azurerm_cosmosdb_collections)}"
 
     # increment the following value when changing the provisioner script to
     # trigger the re-execution of the script
@@ -575,7 +575,7 @@ resource "null_resource" "azurerm_cosmosdb_collections" {
   }
 }
 
-## APPLICATION INSIGHTS
+# Application insights
 
 resource "azurerm_application_insights" "azurerm_application_insights" {
   name                = "${local.azurerm_application_insights_name}"
@@ -586,7 +586,7 @@ resource "azurerm_application_insights" "azurerm_application_insights" {
   application_type = "Web"
 }
 
-## APP SERVICE PLAN
+# App service plan
 
 resource "azurerm_app_service_plan" "azurerm_app_service_plan" {
   name                = "${local.azurerm_app_service_plan_name}"
@@ -601,7 +601,7 @@ resource "azurerm_app_service_plan" "azurerm_app_service_plan" {
   }
 }
 
-## FUNCTIONS
+# Functions
 
 resource "azurerm_function_app" "azurerm_function_app" {
   name                      = "${local.azurerm_functionapp_name}"
@@ -626,43 +626,43 @@ resource "azurerm_function_app" "azurerm_function_app" {
   app_settings = {
     # "AzureWebJobsStorage" = "${azurerm_storage_account.azurerm_functionapp_storage_account.primary_connection_string}"
 
-    "COSMOSDB_NAME" = "${local.azurerm_cosmosdb_documentdb_name}"
+    "COSMOSDB_NAME"                        = "${local.azurerm_cosmosdb_documentdb_name}"
 
-    "QueueStorageConnection" = "${azurerm_storage_account.azurerm_storage_account.primary_connection_string}"
+    "QueueStorageConnection"               = "${azurerm_storage_account.azurerm_storage_account.primary_connection_string}"
 
-    "APPINSIGHTS_INSTRUMENTATIONKEY" = "${azurerm_application_insights.azurerm_application_insights.instrumentation_key}"
+    "APPINSIGHTS_INSTRUMENTATIONKEY"       = "${azurerm_application_insights.azurerm_application_insights.instrumentation_key}"
 
     # Avoid edit functions code from the Azure portal
-    "FUNCTION_APP_EDIT_MODE" = "readonly"
+    "FUNCTION_APP_EDIT_MODE"               = "readonly"
 
     # AzureWebJobsSecretStorageType may be `disabled` or `Blob`
     # When set to `Blob` the API manager task won't be able
     # to retrieve the master key
-    "AzureWebJobsSecretStorageType" = "disabled"
+    "AzureWebJobsSecretStorageType"        = "disabled"
 
-    "WEBSITE_HTTPLOGGING_RETENTION_DAYS" = "3"
+    "WEBSITE_HTTPLOGGING_RETENTION_DAYS"   = "3"
 
     "DIAGNOSTICS_AZUREBLOBRETENTIONINDAYS" = "1"
 
-    "WEBSITE_NODE_DEFAULT_VERSION" = "6.11.2"
+    "WEBSITE_NODE_DEFAULT_VERSION"         = "6.11.2"
 
-    "SCM_USE_FUNCPACK_BUILD" = "1"
+    "SCM_USE_FUNCPACK_BUILD"               = "1"
 
-    "MESSAGE_CONTAINER_NAME" = "${azurerm_storage_blob.azurerm_message_blob.name}"
+    "MESSAGE_CONTAINER_NAME"               = "${azurerm_storage_blob.azurerm_message_blob.name}"
 
-    "MAILUP_USERNAME" = "${data.azurerm_key_vault_secret.mailup_username.value}"
+    "MAILUP_USERNAME"                      = "${data.azurerm_key_vault_secret.mailup_username.value}"
 
-    "MAILUP_SECRET" = "${data.azurerm_key_vault_secret.mailup_secret.value}"
+    "MAILUP_SECRET"                        = "${data.azurerm_key_vault_secret.mailup_secret.value}"
 
-    "MAIL_FROM_DEFAULT" = "${var.default_sender_email}"
+    "MAIL_FROM_DEFAULT"                    = "${var.default_sender_email}"
 
-    "WEBHOOK_CHANNEL_URL" = "${var.webhook_channel_url}${data.azurerm_key_vault_secret.webhook_channel_url_token.value}"
+    "WEBHOOK_CHANNEL_URL"                  = "${var.webhook_channel_url}${data.azurerm_key_vault_secret.webhook_channel_url_token.value}"
 
-    "PUBLIC_API_URL" = "${coalesce(var.functions_public_api_url, local.default_functions_public_api_url)}"
+    "PUBLIC_API_URL"                       = "${coalesce(var.functions_public_api_url, local.default_functions_public_api_url)}"
 
     # API management API-Key (Ocp-Apim-Subscription-Key)
     # set the value manually or with a local provisioner
-    "PUBLIC_API_KEY" = "${data.azurerm_key_vault_secret.functions_public_api_key.value}"
+    "PUBLIC_API_KEY"                       = "${data.azurerm_key_vault_secret.functions_public_api_key.value}"
   }
 
   connection_string = [
@@ -681,7 +681,7 @@ resource "azurerm_function_app" "azurerm_function_app" {
 
 resource "null_resource" "azurerm_function_app_git" {
   triggers = {
-    azurerm_functionapp_id = "${azurerm_function_app.azurerm_function_app.id}"
+    azurerm_functionapp_id         = "${azurerm_function_app.azurerm_function_app.id}"
 
     # trigger recreation of this resource when the following variables change
     azurerm_functionapp_git_repo   = "${var.azurerm_functionapp_git_repo}"
@@ -690,7 +690,7 @@ resource "null_resource" "azurerm_function_app_git" {
     # increment the following value when changing the provisioner script to
     # trigger the re-execution of the script
     # TODO: consider using the hash of the script content instead
-    provisioner_version = "1"
+    provisioner_version            = "1"
   }
 
   provisioner "local-exec" {
@@ -705,7 +705,7 @@ resource "null_resource" "azurerm_function_app_apikey" {
     # increment the following value when changing the provisioner script to
     # trigger the re-execution of the script
     # TODO: consider using the hash of the script content instead
-    provisioner_version = "1"
+    provisioner_version    = "1"
   }
 
   depends_on = ["null_resource.azurerm_app_service_portal"]
@@ -722,7 +722,7 @@ resource "null_resource" "azurerm_function_app_apikey" {
   }
 }
 
-### DEVELOPER PORTAL TASKS
+# Developer portal tasks
 
 resource "azurerm_app_service_plan" "azurerm_app_service_plan_portal" {
   name                = "${local.azurerm_app_service_plan_portal_name}"
@@ -952,15 +952,14 @@ resource "null_resource" "azurerm_notification_hub" {
 
 # API management
 
-## Create and configure the API management service
-
+# Create and configure the API management service
 
 resource "azurerm_api_management" "azurerm_apim" {
-  name                = "${local.azurerm_apim_name}"
-  location            = "${azurerm_resource_group.azurerm_resource_group.location}"
-  resource_group_name = "${azurerm_resource_group.azurerm_resource_group.name}"
-  publisher_name      = "Digital Citizenship"
-  publisher_email     = "apim@agid.gov.it"
+  name                      = "${local.azurerm_apim_name}"
+  location                  = "${azurerm_resource_group.azurerm_resource_group.location}"
+  resource_group_name       = "${azurerm_resource_group.azurerm_resource_group.name}"
+  publisher_name            = "Digital Citizenship"
+  publisher_email           = "apim@agid.gov.it"
   notification_sender_email = "apim@agid.gov.it"
 
   sku {
@@ -993,7 +992,7 @@ resource "null_resource" "azurerm_apim" {
   }
 }
 
-## Connect API management developer portal authentication to Active Directory B2C
+# Connect API management developer portal authentication to Active Directory B2C
 
 resource "null_resource" "azurerm_apim_adb2c" {
   triggers = {
@@ -1019,7 +1018,7 @@ resource "null_resource" "azurerm_apim_adb2c" {
   }
 }
 
-## Connect the API management resource with the EventHub logger
+# Connect the API management resource with the EventHub logger
 
 resource "null_resource" "azurerm_apim_logger" {
   triggers = {
@@ -1046,7 +1045,7 @@ resource "null_resource" "azurerm_apim_logger" {
   }
 }
 
-## Setup OpenAPI in API management service from swagger specs exposed by Functions
+# Setup OpenAPI in API management service from swagger specs exposed by Functions
 
 resource "null_resource" "azurerm_apim_api" {
   triggers = {
@@ -1072,20 +1071,21 @@ resource "null_resource" "azurerm_apim_api" {
   }
 }
 
-#
+
 # DNS Zone
-#
+
 resource "azurerm_dns_zone" "azurerm_dns_main_zone" {
+  # This resource must exist only in the "production" environment
+  count               = "${var.environment == "production" ? 1 : 0}"
+
   name                = "${var.azurerm_dns_main_zone}"
   resource_group_name = "${azurerm_resource_group.azurerm_resource_group.name}"
-
-  # This resource must exist only in the "production" environment
-  count = "${var.environment == "production" ? 1 : 0}"
 }
 
 # default email provider txt spf1 dns record
 resource "azurerm_dns_txt_record" "azurerm_dns_main_zone_spf1" {
   count               = "${var.environment == "production" ? 1 : 0}"
+
   resource_group_name = "${azurerm_resource_group.azurerm_resource_group.name}"
   zone_name           = "${azurerm_dns_zone.azurerm_dns_main_zone.name}"
   name                = "@"
@@ -1099,6 +1099,7 @@ resource "azurerm_dns_txt_record" "azurerm_dns_main_zone_spf1" {
 # default email provider cname dkim dns records
 resource "azurerm_dns_cname_record" "azurerm_dns_main_zone_dkim" {
   count               = "${var.environment == "production" ? length(keys(var.azurerm_dns_main_zone_dkim)) : 0}"
+
   resource_group_name = "${azurerm_resource_group.azurerm_resource_group.name}"
   zone_name           = "${azurerm_dns_zone.azurerm_dns_main_zone.name}"
   name                = "${element(keys(var.azurerm_dns_main_zone_dkim), count.index)}"
@@ -1106,19 +1107,18 @@ resource "azurerm_dns_cname_record" "azurerm_dns_main_zone_dkim" {
   ttl                 = 3600
 }
 
-#
 # Redis cache
-#
+
 resource "azurerm_storage_account" "azurerm_redis_backup" {
   # currently disabled for test environment as the application uses agid-redis-dev
-  count = "${var.environment == "test" ? 0 : 1}"
+  count                     = "${var.environment == "test" ? 0 : 1}"
 
-  name                = "${local.azurerm_redis_backup_name}"
-  resource_group_name = "${azurerm_resource_group.azurerm_resource_group.name}"
-  location            = "${azurerm_resource_group.azurerm_resource_group.location}"
+  name                      = "${local.azurerm_redis_backup_name}"
+  resource_group_name       = "${azurerm_resource_group.azurerm_resource_group.name}"
+  location                  = "${azurerm_resource_group.azurerm_resource_group.location}"
 
   # see https://docs.microsoft.com/en-us/azure/storage/common/storage-introduction#types-of-storage-accounts
-  account_tier = "Standard"
+  account_tier              = "Standard"
 
   # see https://docs.microsoft.com/en-us/azure/storage/common/storage-introduction#replication
   account_replication_type  = "GRS"
@@ -1128,19 +1128,19 @@ resource "azurerm_storage_account" "azurerm_redis_backup" {
 
 resource "azurerm_redis_cache" "azurerm_redis_cache" {
   # currently disabled for test environment as the application uses agid-redis-dev
-  count = "${var.environment == "test" ? 0 : 1}"
+  count                     = "${var.environment == "test" ? 0 : 1}"
 
-  name                = "${local.azurerm_redis_cache_name}"
-  location            = "${azurerm_resource_group.azurerm_resource_group.location}"
-  resource_group_name = "${azurerm_resource_group.azurerm_resource_group.name}"
+  name                      = "${local.azurerm_redis_cache_name}"
+  location                  = "${azurerm_resource_group.azurerm_resource_group.location}"
+  resource_group_name       = "${azurerm_resource_group.azurerm_resource_group.name}"
 
   # Possible values for Premium: n=1=6GB, 2=13Gb, 3=26GB, 4=53GB
-  capacity = 1
+  capacity                  = 1
 
   # Total capacity is shard_count * capacity in GB
-  shard_count = 1
+  shard_count               = 1
 
-  enable_non_ssl_port = false
+  enable_non_ssl_port       = false
 
   # see https://docs.microsoft.com/en-us/azure/redis-cache/cache-faq#what-redis-cache-offering-and-size-should-i-use
   # and https://www.terraform.io/docs/providers/azurerm/r/redis_cache.html#default-redis-configuration-values
@@ -1159,16 +1159,16 @@ resource "azurerm_redis_cache" "azurerm_redis_cache" {
     rdb_storage_connection_string = "${azurerm_storage_account.azurerm_redis_backup.primary_connection_string}"
   }
 
-  subnet_id = "${data.azurerm_subnet.azurerm_redis_cache.id}"
+  subnet_id                 = "${data.azurerm_subnet.azurerm_redis_cache.id}"
 
   # must be inside azurerm_virtual_network.azurerm_redis_cache address space
   private_static_ip_address = "10.230.0.10"
 
   # At the moment we need Premium tier even
   # in the test environment to support clustering
-  family = "P"
+  family                    = "P"
 
-  sku_name = "Premium"
+  sku_name                  = "Premium"
 
   tags {
     environment = "${var.environment}"
@@ -1178,7 +1178,7 @@ resource "azurerm_redis_cache" "azurerm_redis_cache" {
 # Virtual network needed to deploy redis cache
 resource "azurerm_virtual_network" "azurerm_redis_cache" {
   # currently disabled for test environment as the application uses agid-redis-dev
-  count = "${var.environment == "test" ? 0 : 1}"
+  count               = "${var.environment == "test" ? 0 : 1}"
 
   name                = "${local.azurerm_redis_vnet_name}"
   location            = "${azurerm_resource_group.azurerm_resource_group.location}"
@@ -1192,7 +1192,7 @@ resource "azurerm_virtual_network" "azurerm_redis_cache" {
 
 data "azurerm_subnet" "azurerm_redis_cache" {
   # currently disabled for test environment as the application uses agid-redis-dev
-  count = "${var.environment == "test" ? 0 : 1}"
+  count                = "${var.environment == "test" ? 0 : 1}"
 
   name                 = "default"
   virtual_network_name = "${local.azurerm_redis_vnet_name}"
@@ -1202,7 +1202,7 @@ data "azurerm_subnet" "azurerm_redis_cache" {
 # Peering from the Redis Cache VNet to the AKS agent VNet
 resource "azurerm_virtual_network_peering" "redis_to_aks" {
   # currently disabled for test environment as the application uses agid-redis-dev
-  count = "${var.environment == "test" ? 0 : 1}"
+  count                        = "${var.environment == "test" ? 0 : 1}"
 
   name                         = "RedisToAks"
   resource_group_name          = "${azurerm_resource_group.azurerm_resource_group.name}"
@@ -1222,7 +1222,7 @@ resource "azurerm_virtual_network_peering" "redis_to_aks" {
 # Peering from the AKS agent VNet to the Redis Cache VNet
 resource "azurerm_virtual_network_peering" "aks_to_redis" {
   # currently disabled for test environment as the application uses agid-redis-dev
-  count = "${var.environment == "test" ? 0 : 1}"
+  count                        = "${var.environment == "test" ? 0 : 1}"
 
   name                         = "AksToRedis"
   resource_group_name          = "${module.kubernetes.aks_rg_name}"
@@ -1231,9 +1231,8 @@ resource "azurerm_virtual_network_peering" "aks_to_redis" {
   allow_virtual_network_access = "true"
 }
 
-#
 # Azure Container Service (Kubernetes)
-#
+
 locals {
   # The ssh public key for the admin account on the k8s nodes is read from the
   # file stored in the "files" directory and named after the value of the
@@ -1242,7 +1241,7 @@ locals {
 }
 
 module "kubernetes" {
-  source = "./modules/azurerm/kubernetes"
+  source                          = "./modules/azurerm/kubernetes"
 
   environment                     = "${var.environment}"
   resource_group_location         = "${azurerm_resource_group.azurerm_resource_group.location}"
@@ -1280,19 +1279,17 @@ output "azurerm_kubernetes_public_ip_ip" {
   value = "${azurerm_public_ip.azurerm_kubernetes_public_ip.ip_address}"
 }
 
-#
 # PagoPA VPN
 # Currently enabled only for test environment
 #
 # WARNING: see note in the module source about associating AKS agents to the
 # backend pool.
-#
 
 module "pagopa_vpn" {
-  source = "./modules/pagopa-vpn"
+  source                       = "./modules/pagopa-vpn"
 
   # This resource must exist only in the "test" environment
-  enable = "${var.environment == "test" ? "true" : "false"}"
+  enable                       = "${var.environment == "test" ? "true" : "false"}"
 
   environment                  = "${var.environment}"
   azurerm_resource_name_prefix = "${var.azurerm_resource_name_prefix}"

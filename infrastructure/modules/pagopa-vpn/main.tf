@@ -1,7 +1,5 @@
-#
 # Creates a site-to-site VPN connection
 # suitable for the pagoPA test environment
-#
 
 locals {
   # Address space of the VPN virtual network
@@ -54,8 +52,8 @@ locals {
 }
 
 resource "azurerm_virtual_network" "default" {
-  # only create when enable == "true"
-  count = "${var.enable == "true" ? 1 : 0}"
+  # Only create when enable == "true"
+  count               = "${var.enable == "true" ? 1 : 0}"
 
   name                = "${local.virtual_network_name}"
   location            = "${var.resource_group_location}"
@@ -67,13 +65,11 @@ resource "azurerm_virtual_network" "default" {
   }
 }
 
-#
 # VPN configuration
-#
 
 resource "azurerm_subnet" "gateway" {
-  # only create when enable == "true"
-  count = "${var.enable == "true" ? 1 : 0}"
+  # Only create when enable == "true"
+  count                = "${var.enable == "true" ? 1 : 0}"
 
   # The name of this subnet must be "GatewaySubnet"
   name                 = "GatewaySubnet"
@@ -83,8 +79,8 @@ resource "azurerm_subnet" "gateway" {
 }
 
 resource "azurerm_local_network_gateway" "default" {
-  # only create when enable == "true"
-  count = "${var.enable == "true" ? 1 : 0}"
+  # Only create when enable == "true"
+  count               = "${var.enable == "true" ? 1 : 0}"
 
   name                = "${local.local_network_gateway_name}"
   location            = "${var.resource_group_location}"
@@ -98,8 +94,8 @@ resource "azurerm_local_network_gateway" "default" {
 }
 
 resource "azurerm_public_ip" "default" {
-  # only create when enable == "true"
-  count = "${var.enable == "true" ? 1 : 0}"
+  # Only create when enable == "true"
+  count               = "${var.enable == "true" ? 1 : 0}"
 
   name                = "${local.public_ip_name}"
   location            = "${var.resource_group_location}"
@@ -112,19 +108,19 @@ resource "azurerm_public_ip" "default" {
 }
 
 resource "azurerm_virtual_network_gateway" "default" {
-  # only create when enable == "true"
-  count = "${var.enable == "true" ? 1 : 0}"
+  # Only create when enable == "true"
+  count               = "${var.enable == "true" ? 1 : 0}"
 
   name                = "${local.virtual_network_gateway_name}"
   location            = "${var.resource_group_location}"
   resource_group_name = "${var.resource_group_name}"
 
-  type     = "Vpn"
-  vpn_type = "RouteBased"
+  type                = "Vpn"
+  vpn_type            = "RouteBased"
 
-  active_active = false
-  enable_bgp    = false
-  sku           = "${local.vpn_sku}"
+  active_active       = false
+  enable_bgp          = false
+  sku                 = "${local.vpn_sku}"
 
   ip_configuration {
     public_ip_address_id          = "${azurerm_public_ip.default.id}"
@@ -138,18 +134,18 @@ resource "azurerm_virtual_network_gateway" "default" {
 }
 
 resource "azurerm_virtual_network_gateway_connection" "default" {
-  # only create when enable == "true"
-  count = "${var.enable == "true" ? 1 : 0}"
+  # Only create when enable == "true"
+  count                      = "${var.enable == "true" ? 1 : 0}"
 
-  name                = "${local.virtual_network_gateway_connection_name}"
-  location            = "${var.resource_group_location}"
-  resource_group_name = "${var.resource_group_name}"
+  name                       = "${local.virtual_network_gateway_connection_name}"
+  location                   = "${var.resource_group_location}"
+  resource_group_name        = "${var.resource_group_name}"
 
   type                       = "IPsec"
   virtual_network_gateway_id = "${azurerm_virtual_network_gateway.default.id}"
   local_network_gateway_id   = "${azurerm_local_network_gateway.default.id}"
 
-  shared_key = "${var.vpn_shared_key}"
+  shared_key                 = "${var.vpn_shared_key}"
 
   ipsec_policy {
     dh_group         = "DHGroup2"
@@ -167,8 +163,8 @@ resource "azurerm_virtual_network_gateway_connection" "default" {
 }
 
 resource "azurerm_subnet" "default" {
-  # only create when enable == "true"
-  count = "${var.enable == "true" ? 1 : 0}"
+  # Only create when enable == "true"
+  count                = "${var.enable == "true" ? 1 : 0}"
 
   name                 = "default"
   resource_group_name  = "${var.resource_group_name}"
@@ -176,13 +172,11 @@ resource "azurerm_subnet" "default" {
   address_prefix       = "${local.vpn_default_subnet}"
 }
 
-#
 # Load balancer VM
-#
 
 resource "azurerm_network_security_group" "lb_nsg" {
-  # only create when enable == "true"
-  count = "${var.enable == "true" ? 1 : 0}"
+  # Only create when enable == "true"
+  count               = "${var.enable == "true" ? 1 : 0}"
 
   name                = "${local.loadbalancer_nsg_name}"
   location            = "${var.resource_group_location}"
@@ -194,12 +188,12 @@ resource "azurerm_network_security_group" "lb_nsg" {
 }
 
 resource "azurerm_network_interface" "lb_interface" {
-  # only create when enable == "true"
-  count = "${var.enable == "true" ? 1 : 0}"
+  # Only create when enable == "true"
+  count                     = "${var.enable == "true" ? 1 : 0}"
 
-  name                = "${local.loadbalancer_interface_name}"
-  location            = "${var.resource_group_location}"
-  resource_group_name = "${var.resource_group_name}"
+  name                      = "${local.loadbalancer_interface_name}"
+  location                  = "${var.resource_group_location}"
+  resource_group_name       = "${var.resource_group_name}"
 
   network_security_group_id = "${azurerm_network_security_group.lb_nsg.id}"
 
@@ -217,7 +211,7 @@ resource "azurerm_network_interface" "lb_interface" {
 
 resource "azurerm_virtual_machine" "lb_vm" {
   # only create when enable == "true"
-  count = "${var.enable == "true" ? 1 : 0}"
+  count                 = "${var.enable == "true" ? 1 : 0}"
 
   name                  = "${local.loadbalancer_vm_name}"
   location              = "${var.resource_group_location}"
@@ -226,7 +220,7 @@ resource "azurerm_virtual_machine" "lb_vm" {
 
   # This VM will be mostly idle, we can use a burstable type
   # https://docs.microsoft.com/en-us/azure/virtual-machines/linux/sizes-general#b-series
-  vm_size = "Standard_B1s"
+  vm_size               = "Standard_B1s"
 
   # Uncomment this line to delete the OS disk automatically when deleting the VM
   # delete_os_disk_on_termination = true
@@ -269,8 +263,8 @@ resource "azurerm_virtual_machine" "lb_vm" {
 # Provision the VM by running a custom script
 # Increase the value of "timestamp" for force the script to run again
 resource "azurerm_virtual_machine_extension" "lb_vm_ext" {
-  # only create when enable == "true"
-  count = "${var.enable == "true" ? 1 : 0}"
+  # Only create when enable == "true"
+  count                = "${var.enable == "true" ? 1 : 0}"
 
   name                 = "${local.loadbalancer_vm_ext_name}"
   location             = "${var.resource_group_location}"
@@ -293,14 +287,12 @@ SETTINGS
   }
 }
 
-#
 # Peerings between the VPN virtual network and the AKS virtual network
-#
 
 # Peering from the pagoPA VPN VNet to the AKS agent VNet
 resource "azurerm_virtual_network_peering" "pagopa_to_aks" {
-  # only create when enable == "true"
-  count = "${var.enable == "true" ? 1 : 0}"
+  # Only create when enable == "true"
+  count                        = "${var.enable == "true" ? 1 : 0}"
 
   name                         = "PagoPaToAks"
   resource_group_name          = "${var.resource_group_name}"
@@ -319,8 +311,8 @@ resource "azurerm_virtual_network_peering" "pagopa_to_aks" {
 
 # Peering from the AKS agent VNet to the pagoPA VPN VNet
 resource "azurerm_virtual_network_peering" "aks_to_pagopa" {
-  # only create when enable == "true"
-  count = "${var.enable == "true" ? 1 : 0}"
+  # Only create when enable == "true"
+  count                        = "${var.enable == "true" ? 1 : 0}"
 
   name                         = "AksToPagoPa"
   resource_group_name          = "${var.aks_rg_name}"
@@ -329,14 +321,12 @@ resource "azurerm_virtual_network_peering" "aks_to_pagopa" {
   allow_virtual_network_access = "true"
 }
 
-#
 # Network security rules for AKS agent nodes
-#
 
 # Allow inbound TCP from the VPN-pagoPA loadbalancer to pods:{aks_nodeport}
 resource "azurerm_network_security_rule" "inbound_pagopa" {
-  # only create when enable == "true"
-  count = "${var.enable == "true" ? 1 : 0}"
+  # Only create when enable == "true"
+  count                       = "${var.enable == "true" ? 1 : 0}"
 
   name                        = "inbound_pagopa"
   priority                    = 110
@@ -353,8 +343,8 @@ resource "azurerm_network_security_rule" "inbound_pagopa" {
 
 # Allow outbound TCP from the aks pods to port {vpn_loadbalancer_inbound_port} of VPN-pagoPA loadbalancer
 resource "azurerm_network_security_rule" "outbound_pagopa" {
-  # only create when enable == "true"
-  count = "${var.enable == "true" ? 1 : 0}"
+  # Only create when enable == "true"
+  count                       = "${var.enable == "true" ? 1 : 0}"
 
   name                        = "outbound_pagopa"
   priority                    = 110
@@ -369,14 +359,12 @@ resource "azurerm_network_security_rule" "outbound_pagopa" {
   network_security_group_name = "${var.aks_nsg_name}"
 }
 
-#
 # Network security rules for the VPN load balancer
-#
 
 # Allow outbound TCP from the VPN-pagoPA loadbalancer to pods:{aks_nodeport}
 resource "azurerm_network_security_rule" "outbound_aks" {
-  # only create when enable == "true"
-  count = "${var.enable == "true" ? 1 : 0}"
+  # Only create when enable == "true"
+  count                       = "${var.enable == "true" ? 1 : 0}"
 
   name                        = "outbound_aks"
   priority                    = 110
@@ -394,7 +382,7 @@ resource "azurerm_network_security_rule" "outbound_aks" {
 # Allow inbound TCP from the aks pods to port {vpn_loadbalancer_inbound_port} of VPN-pagoPA loadbalancer
 resource "azurerm_network_security_rule" "inbound_aks" {
   # only create when enable == "true"
-  count = "${var.enable == "true" ? 1 : 0}"
+  count                       = "${var.enable == "true" ? 1 : 0}"
 
   name                        = "inbound_aks"
   priority                    = 110
@@ -410,4 +398,3 @@ resource "azurerm_network_security_rule" "inbound_aks" {
 }
 
 # TODO: add deny rules for free traffic between VNets
-

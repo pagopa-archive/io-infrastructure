@@ -1,6 +1,4 @@
-#
 # Kubernetes cluster
-#
 
 resource "azurerm_kubernetes_cluster" "azurerm_kubernetes_cluster" {
   name                = "${var.name}"
