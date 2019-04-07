@@ -1110,9 +1110,6 @@ resource "azurerm_dns_cname_record" "azurerm_dns_main_zone_dkim" {
 # Redis cache
 #
 resource "azurerm_storage_account" "azurerm_redis_backup" {
-  # currently disabled for test environment as the application uses agid-redis-dev
-  count = "${var.environment == "test" ? 0 : 1}"
-
   name                = "${local.azurerm_redis_backup_name}"
   resource_group_name = "${azurerm_resource_group.azurerm_resource_group.name}"
   location            = "${azurerm_resource_group.azurerm_resource_group.location}"
@@ -1127,9 +1124,6 @@ resource "azurerm_storage_account" "azurerm_redis_backup" {
 }
 
 resource "azurerm_redis_cache" "azurerm_redis_cache" {
-  # currently disabled for test environment as the application uses agid-redis-dev
-  count = "${var.environment == "test" ? 0 : 1}"
-
   name                = "${local.azurerm_redis_cache_name}"
   location            = "${azurerm_resource_group.azurerm_resource_group.location}"
   resource_group_name = "${azurerm_resource_group.azurerm_resource_group.name}"
@@ -1177,9 +1171,6 @@ resource "azurerm_redis_cache" "azurerm_redis_cache" {
 
 # Virtual network needed to deploy redis cache
 resource "azurerm_virtual_network" "azurerm_redis_cache" {
-  # currently disabled for test environment as the application uses agid-redis-dev
-  count = "${var.environment == "test" ? 0 : 1}"
-
   name                = "${local.azurerm_redis_vnet_name}"
   location            = "${azurerm_resource_group.azurerm_resource_group.location}"
   resource_group_name = "${azurerm_resource_group.azurerm_resource_group.name}"
@@ -1191,9 +1182,6 @@ resource "azurerm_virtual_network" "azurerm_redis_cache" {
 }
 
 data "azurerm_subnet" "azurerm_redis_cache" {
-  # currently disabled for test environment as the application uses agid-redis-dev
-  count = "${var.environment == "test" ? 0 : 1}"
-
   name                 = "default"
   virtual_network_name = "${local.azurerm_redis_vnet_name}"
   resource_group_name  = "${azurerm_resource_group.azurerm_resource_group.name}"
@@ -1201,9 +1189,6 @@ data "azurerm_subnet" "azurerm_redis_cache" {
 
 # Peering from the Redis Cache VNet to the AKS agent VNet
 resource "azurerm_virtual_network_peering" "redis_to_aks" {
-  # currently disabled for test environment as the application uses agid-redis-dev
-  count = "${var.environment == "test" ? 0 : 1}"
-
   name                         = "RedisToAks"
   resource_group_name          = "${azurerm_resource_group.azurerm_resource_group.name}"
   virtual_network_name         = "${azurerm_virtual_network.azurerm_redis_cache.name}"
@@ -1221,9 +1206,6 @@ resource "azurerm_virtual_network_peering" "redis_to_aks" {
 
 # Peering from the AKS agent VNet to the Redis Cache VNet
 resource "azurerm_virtual_network_peering" "aks_to_redis" {
-  # currently disabled for test environment as the application uses agid-redis-dev
-  count = "${var.environment == "test" ? 0 : 1}"
-
   name                         = "AksToRedis"
   resource_group_name          = "${module.kubernetes.aks_rg_name}"
   virtual_network_name         = "${module.kubernetes.aks_vnet_name}"
