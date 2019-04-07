@@ -74,7 +74,7 @@ spec:
         - name: "PAGOPA_TIMEOUT_MSEC"
           value: "500000"
         - name: "REDIS_DB_URL"
-          value: "agid-redis-dev.redis.cache.windows.net"
+          value: "agid-redis-test.redis.cache.windows.net"
         - name: "REDIS_DB_PORT"
           value: "6380"
         - name: "REDIS_DB_PASSWORD"
