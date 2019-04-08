@@ -33,7 +33,7 @@ locals {
   loadbalancer_vm_admin_user = "admin-user"
 
   # Loadbalancer playbook repository name
-  loadbalancer_playbook_repo_name = "digital-citizenship-ansible-playbooks"
+  loadbalancer_playbook_repo_name = "io-ansible-playbooks"
 
   # loadbalancer playbook archive URL
   loadbalancer_playbook_url = "https://raw.githubusercontent.com/teamdigitale/${local.loadbalancer_playbook_repo_name}"
