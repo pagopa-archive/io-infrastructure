@@ -45,7 +45,7 @@ spec:
         - name: "PAGOPA_PORT"
           value: "80"
         - name: "PAGOPA_HOST_HEADER"
-          value: "nodopa.te.sia.eu"
+          value: "nodopa.sia.eu"
         - name: "PAGOPA_PASSWORD"
           valueFrom:
             secretKeyRef:
