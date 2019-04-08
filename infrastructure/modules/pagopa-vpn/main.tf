@@ -39,7 +39,7 @@ locals {
   loadbalancer_playbook_url = "https://raw.githubusercontent.com/teamdigitale/${local.loadbalancer_playbook_repo_name}"
 
   # loadbalancer playbook archive version
-  loadbalancer_playbook_version = "0.0.11"
+  loadbalancer_playbook_version = "0.0.12"
 
   # Precompute resource names based on naming convention
   virtual_network_name                    = "${var.azurerm_resource_name_prefix}-ppa-vpn-vnet-${var.environment_short}"
@@ -283,7 +283,7 @@ resource "azurerm_virtual_machine_extension" "lb_vm_ext" {
   settings = <<SETTINGS
     {
       "fileUris": ["${local.loadbalancer_playbook_url}/v${local.loadbalancer_playbook_version}/pagopa_lb_vm/run.sh"],
-      "commandToExecute": "./run.sh",
+      "commandToExecute": "./run.sh ${local.loadbalancer_playbook_version}",
       "timestamp": 1
     }
 SETTINGS
