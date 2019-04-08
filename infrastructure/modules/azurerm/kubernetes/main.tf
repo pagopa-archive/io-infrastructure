@@ -56,5 +56,5 @@ locals {
 data "azurerm_virtual_network" "aks" {
   name                = "aks-vnet-${local.aks_id}"
   resource_group_name = "${local.agents_resource_group_name}"
-  depends_on          = ["azurerm_kubernetes_cluster.azurerm_kubernetes_cluster"]
+  # depends_on          = ["azurerm_kubernetes_cluster.azurerm_kubernetes_cluster"]
 }

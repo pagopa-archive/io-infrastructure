@@ -297,6 +297,11 @@ variable "functions_public_api_url" {
   default = ""
 }
 
+# Redis cache related variables
+variable "azurerm_redis_cache_private_static_ip_address" {
+  description = "The private IP address to be assigned to the Redis cache"
+}
+
 #
 # Compute name of resources
 #
@@ -1156,7 +1161,7 @@ resource "azurerm_redis_cache" "azurerm_redis_cache" {
   subnet_id = "${data.azurerm_subnet.azurerm_redis_cache.id}"
 
   # must be inside azurerm_virtual_network.azurerm_redis_cache address space
-  private_static_ip_address = "10.230.0.10"
+  private_static_ip_address = "${var.azurerm_redis_cache_private_static_ip_address}"
 
   # At the moment we need Premium tier even
   # in the test environment to support clustering
@@ -1167,6 +1172,10 @@ resource "azurerm_redis_cache" "azurerm_redis_cache" {
   tags {
     environment = "${var.environment}"
   }
+}
+
+output "azurerm_redis_cache_primary_access_key" {
+  value = "${azurerm_redis_cache.azurerm_redis_cache.primary_access_key}"
 }
 
 # Virtual network needed to deploy redis cache
