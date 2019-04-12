@@ -245,7 +245,7 @@ variable "azurerm_dns_main_zone_dkim" {
 #
 
 variable "cosmosdb_collection_provisioner" {
-  default = "infrastructure/local-provisioners/azurerm_cosmosdb_collection.ts"
+  default = "local-provisioners/azurerm_cosmosdb_collection.ts"
 }
 
 variable "website_git_provisioner" {
@@ -562,7 +562,7 @@ resource "null_resource" "azurerm_cosmosdb_collections" {
     # increment the following value when changing the provisioner script to
     # trigger the re-execution of the script
     # TODO: consider using the hash of the script content instead
-    provisioner_version = "5"
+    provisioner_version = "6"
   }
 
   count = "${length(keys(var.azurerm_cosmosdb_collections))}"
@@ -577,6 +577,13 @@ resource "null_resource" "azurerm_cosmosdb_collections" {
       "--azurerm_cosmosdb_collection_pk ${lookup(var.azurerm_cosmosdb_collections, element(keys(var.azurerm_cosmosdb_collections), count.index))}",
       "--azurerm_cosmosdb_key ${azurerm_cosmosdb_account.azurerm_cosmosdb.primary_master_key}"))
     }"
+
+    environment = {
+      ENVIRONMENT = "${var.environment}"
+      TF_VAR_ADB2C_TENANT_ID = "${var.ADB2C_TENANT_ID}"
+      TF_VAR_DEV_PORTAL_CLIENT_ID = "${data.azurerm_key_vault_secret.dev_portal_client_id.value}"
+      TF_VAR_DEV_PORTAL_CLIENT_SECRET = "${data.azurerm_key_vault_secret.dev_portal_client_secret.value}"
+    }
   }
 }
 
