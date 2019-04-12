@@ -249,31 +249,31 @@ variable "cosmosdb_collection_provisioner" {
 }
 
 variable "website_git_provisioner" {
-  default = "infrastructure/local-provisioners/azurerm_website_git.ts"
+  default = "local-provisioners/azurerm_website_git.ts"
 }
 
 variable "apim_provisioner" {
-  default = "infrastructure/local-provisioners/azurerm_apim.ts"
+  default = "local-provisioners/azurerm_apim.ts"
 }
 
 variable "apim_logger_provisioner" {
-  default = "infrastructure/local-provisioners/azurerm_apim_logger.ts"
+  default = "local-provisioners/azurerm_apim_logger.ts"
 }
 
 variable "apim_adb2c_provisioner" {
-  default = "infrastructure/local-provisioners/azurerm_apim_adb2c.ts"
+  default = "local-provisioners/azurerm_apim_adb2c.ts"
 }
 
 variable "apim_api_provisioner" {
-  default = "infrastructure/local-provisioners/azurerm_apim_api.ts"
+  default = "local-provisioners/azurerm_apim_api.ts"
 }
 
 variable "app_service_portal_provisioner" {
-  default = "infrastructure/local-provisioners/azurerm_app_service_portal.ts"
+  default = "local-provisioners/azurerm_app_service_portal.ts"
 }
 
 variable "functionapp_apikey_provisioner" {
-  default = "infrastructure/local-provisioners/azurerm_functionapp_apikey.ts"
+  default = "local-provisioners/azurerm_functionapp_apikey.ts"
 }
 
 variable "apim_configuration_path" {
@@ -282,11 +282,11 @@ variable "apim_configuration_path" {
 }
 
 variable "notification_hub_provisioner" {
-  default = "infrastructure/local-provisioners/azurerm_notification_hub.ts"
+  default = "local-provisioners/azurerm_notification_hub.ts"
 }
 
 variable "cosmosdb_iprange_provisioner" {
-  default = "infrastructure/local-provisioners/azurerm_cosmosdb_iprange.ts"
+  default = "local-provisioners/azurerm_cosmosdb_iprange.ts"
 }
 
 variable "key_vault_id" {
@@ -706,7 +706,20 @@ resource "null_resource" "azurerm_function_app_git" {
   }
 
   provisioner "local-exec" {
-    command = "ts-node ${var.website_git_provisioner} --resource-group-name ${azurerm_resource_group.azurerm_resource_group.name} --app-name ${azurerm_function_app.azurerm_function_app.name} --git-repo ${var.azurerm_functionapp_git_repo} --git-branch ${var.azurerm_functionapp_git_branch}"
+    command = "${join(" ", list(
+      "ts-node ${var.website_git_provisioner}",
+      "--resource-group-name ${azurerm_resource_group.azurerm_resource_group.name}",
+      "--app-name ${azurerm_function_app.azurerm_function_app.name}",
+      "--git-repo ${var.azurerm_functionapp_git_repo}",
+      "--git-branch ${var.azurerm_functionapp_git_branch}"))
+    }"
+
+    environment = {
+      ENVIRONMENT = "${var.environment}"
+      TF_VAR_ADB2C_TENANT_ID = "${var.ADB2C_TENANT_ID}"
+      TF_VAR_DEV_PORTAL_CLIENT_ID = "${data.azurerm_key_vault_secret.dev_portal_client_id.value}"
+      TF_VAR_DEV_PORTAL_CLIENT_SECRET = "${data.azurerm_key_vault_secret.dev_portal_client_secret.value}"
+    }
   }
 }
 
@@ -731,6 +744,13 @@ resource "null_resource" "azurerm_function_app_apikey" {
       "--apim_configuration_path ${var.apim_configuration_path}",
       "--azurerm_functionapp ${azurerm_function_app.azurerm_function_app.name}"))
     }"
+
+    environment = {
+      ENVIRONMENT = "${var.environment}"
+      TF_VAR_ADB2C_TENANT_ID = "${var.ADB2C_TENANT_ID}"
+      TF_VAR_DEV_PORTAL_CLIENT_ID = "${data.azurerm_key_vault_secret.dev_portal_client_id.value}"
+      TF_VAR_DEV_PORTAL_CLIENT_SECRET = "${data.azurerm_key_vault_secret.dev_portal_client_secret.value}"
+    }
   }
 }
 
@@ -829,6 +849,13 @@ resource "null_resource" "azurerm_app_service_portal" {
       "--azurerm_documentdb ${local.azurerm_cosmosdb_documentdb_name}",
       "--azurerm_cosmosdb_key ${azurerm_cosmosdb_account.azurerm_cosmosdb.primary_master_key}"))
     }"
+
+    environment = {
+      ENVIRONMENT = "${var.environment}"
+      TF_VAR_ADB2C_TENANT_ID = "${var.ADB2C_TENANT_ID}"
+      TF_VAR_DEV_PORTAL_CLIENT_ID = "${data.azurerm_key_vault_secret.dev_portal_client_id.value}"
+      TF_VAR_DEV_PORTAL_CLIENT_SECRET = "${data.azurerm_key_vault_secret.dev_portal_client_secret.value}"
+    }
   }
 }
 
@@ -847,7 +874,20 @@ resource "null_resource" "azurerm_app_service_portal_git" {
   }
 
   provisioner "local-exec" {
-    command = "ts-node ${var.website_git_provisioner} --resource-group-name ${azurerm_resource_group.azurerm_resource_group.name} --app-name ${azurerm_app_service.azurerm_app_service_portal.name} --git-repo ${var.app_service_portal_git_repo} --git-branch ${var.app_service_portal_git_branch}"
+    command = "${join(" ", list(
+      "ts-node ${var.website_git_provisioner}",
+      "--resource-group-name ${azurerm_resource_group.azurerm_resource_group.name}",
+      "--app-name ${azurerm_app_service.azurerm_app_service_portal.name}",
+      "--git-repo ${var.app_service_portal_git_repo}",
+      "--git-branch ${var.app_service_portal_git_branch}"))
+    }"
+
+    environment = {
+      ENVIRONMENT = "${var.environment}"
+      TF_VAR_ADB2C_TENANT_ID = "${var.ADB2C_TENANT_ID}"
+      TF_VAR_DEV_PORTAL_CLIENT_ID = "${data.azurerm_key_vault_secret.dev_portal_client_id.value}"
+      TF_VAR_DEV_PORTAL_CLIENT_SECRET = "${data.azurerm_key_vault_secret.dev_portal_client_secret.value}"
+    }
   }
 }
 
@@ -867,7 +907,19 @@ resource "null_resource" "azurerm_cosmosdb_ip_range_filter" {
   }
 
   provisioner "local-exec" {
-    command = "ts-node ${var.cosmosdb_iprange_provisioner} --resource-group-name ${azurerm_resource_group.azurerm_resource_group.name} --cosmosdb-name ${azurerm_cosmosdb_account.azurerm_cosmosdb.name} --ips ${local.application_outbound_ips}"
+    command = "${join(" ", list(
+      "ts-node ${var.cosmosdb_iprange_provisioner}",
+      "--resource-group-name ${azurerm_resource_group.azurerm_resource_group.name}",
+      "--cosmosdb-name ${azurerm_cosmosdb_account.azurerm_cosmosdb.name}",
+      "--ips ${local.application_outbound_ips}"))
+    }"
+
+    environment = {
+      ENVIRONMENT = "${var.environment}"
+      TF_VAR_ADB2C_TENANT_ID = "${var.ADB2C_TENANT_ID}"
+      TF_VAR_DEV_PORTAL_CLIENT_ID = "${data.azurerm_key_vault_secret.dev_portal_client_id.value}"
+      TF_VAR_DEV_PORTAL_CLIENT_SECRET = "${data.azurerm_key_vault_secret.dev_portal_client_secret.value}"
+    }
   }
 }
 
@@ -959,6 +1011,13 @@ resource "null_resource" "azurerm_notification_hub" {
       "--notification_hub_gcm_key ${data.azurerm_key_vault_secret.notification_hub_gcm_key.value}",
       "--azurerm_notification_hub ${local.azurerm_notification_hub}"))
     }"
+
+    environment = {
+      ENVIRONMENT = "${var.environment}"
+      TF_VAR_ADB2C_TENANT_ID = "${var.ADB2C_TENANT_ID}"
+      TF_VAR_DEV_PORTAL_CLIENT_ID = "${data.azurerm_key_vault_secret.dev_portal_client_id.value}"
+      TF_VAR_DEV_PORTAL_CLIENT_SECRET = "${data.azurerm_key_vault_secret.dev_portal_client_secret.value}"
+    }
   }
 }
 
@@ -968,6 +1027,8 @@ resource "null_resource" "azurerm_notification_hub" {
 
 
 resource "azurerm_api_management" "azurerm_apim" {
+  count               = "${var.environment == "production" ? 1 : 0}"
+
   name                = "${local.azurerm_apim_name}"
   location            = "${azurerm_resource_group.azurerm_resource_group.location}"
   resource_group_name = "${azurerm_resource_group.azurerm_resource_group.name}"
@@ -985,10 +1046,12 @@ resource "azurerm_api_management" "azurerm_apim" {
 }
 
 resource "null_resource" "azurerm_apim" {
+  count               = "${var.environment == "production" ? 1 : 0}"
+
   triggers = {
     azurerm_function_app_id     = "${azurerm_function_app.azurerm_function_app.id}"
     azurerm_resource_group_name = "${azurerm_resource_group.azurerm_resource_group.name}"
-    provisioner_version         = "1"
+    provisioner_version         = "2"
   }
 
   provisioner "local-exec" {
@@ -1002,20 +1065,29 @@ resource "null_resource" "azurerm_apim" {
       "--azurerm_app_service_portal ${local.azurerm_app_service_portal_name}",
       "--apim_configuration_path ${var.apim_configuration_path}"))
     }"
+
+    environment = {
+      ENVIRONMENT = "${var.environment}"
+      TF_VAR_ADB2C_TENANT_ID = "${var.ADB2C_TENANT_ID}"
+      TF_VAR_DEV_PORTAL_CLIENT_ID = "${data.azurerm_key_vault_secret.dev_portal_client_id.value}"
+      TF_VAR_DEV_PORTAL_CLIENT_SECRET = "${data.azurerm_key_vault_secret.dev_portal_client_secret.value}"
+    }
   }
 }
 
 ## Connect API management developer portal authentication to Active Directory B2C
 
 resource "null_resource" "azurerm_apim_adb2c" {
+  count = "${var.environment == "production" ? 1 : 0}"
+
   triggers = {
     azurerm_function_app_id     = "${azurerm_function_app.azurerm_function_app.id}"
     azurerm_resource_group_name = "${azurerm_resource_group.azurerm_resource_group.name}"
-    azurerm_apim_id             = "${null_resource.azurerm_apim.id}"
+    azurerm_apim_id             = "${azurerm_api_management.azurerm_apim.id}"
     provisioner_version         = "1"
   }
 
-  depends_on = ["null_resource.azurerm_apim"]
+  depends_on = ["azurerm_api_management.azurerm_apim"]
 
   provisioner "local-exec" {
     command = "${join(" ", list(
@@ -1026,24 +1098,33 @@ resource "null_resource" "azurerm_apim_adb2c" {
       "--apim_configuration_path ${var.apim_configuration_path}",
       "--adb2c_tenant_id ${var.ADB2C_TENANT_ID}",
       "--adb2c_portal_client_id ${data.azurerm_key_vault_secret.dev_portal_client_id.value}",
-      "--adb2c_portal_client_secret ${data.azurerm_key_vault_secret.dev_portal_client_secret.value}"))
+      "--adb2c_portal_client_secret '${data.azurerm_key_vault_secret.dev_portal_client_secret.value}'"))
     }"
+
+    environment = {
+      ENVIRONMENT = "${var.environment}"
+      TF_VAR_ADB2C_TENANT_ID = "${var.ADB2C_TENANT_ID}"
+      TF_VAR_DEV_PORTAL_CLIENT_ID = "${data.azurerm_key_vault_secret.dev_portal_client_id.value}"
+      TF_VAR_DEV_PORTAL_CLIENT_SECRET = "${data.azurerm_key_vault_secret.dev_portal_client_secret.value}"
+    }
   }
 }
 
 ## Connect the API management resource with the EventHub logger
 
 resource "null_resource" "azurerm_apim_logger" {
+  count = "${var.environment == "production" ? 1 : 0}"
+
   triggers = {
     azurerm_function_app_id            = "${azurerm_function_app.azurerm_function_app.id}"
     azurerm_resource_group_name        = "${azurerm_resource_group.azurerm_resource_group.name}"
     azurerm_apim_eventhub_id           = "${azurerm_eventhub.azurerm_apim_eventhub.id}"
     azurerm_eventhub_connection_string = "${azurerm_eventhub_authorization_rule.azurerm_apim_eventhub_rule.primary_connection_string}"
-    azurerm_apim_id                    = "${null_resource.azurerm_apim.id}"
+    azurerm_apim_id                    = "${azurerm_api_management.azurerm_apim.id}"
     provisioner_version                = "1"
   }
 
-  depends_on = ["null_resource.azurerm_apim"]
+  depends_on = ["azurerm_api_management.azurerm_apim"]
 
   provisioner "local-exec" {
     command = "${join(" ", list(
@@ -1055,16 +1136,25 @@ resource "null_resource" "azurerm_apim_logger" {
       "--apim_configuration_path ${var.apim_configuration_path}",
       "--azurerm_apim_eventhub_connstr ${azurerm_eventhub_authorization_rule.azurerm_apim_eventhub_rule.primary_connection_string}"))
     }"
+
+    environment = {
+      ENVIRONMENT = "${var.environment}"
+      TF_VAR_ADB2C_TENANT_ID = "${var.ADB2C_TENANT_ID}"
+      TF_VAR_DEV_PORTAL_CLIENT_ID = "${data.azurerm_key_vault_secret.dev_portal_client_id.value}"
+      TF_VAR_DEV_PORTAL_CLIENT_SECRET = "${data.azurerm_key_vault_secret.dev_portal_client_secret.value}"
+    }
   }
 }
 
 ## Setup OpenAPI in API management service from swagger specs exposed by Functions
 
 resource "null_resource" "azurerm_apim_api" {
+  count = "${var.environment == "production" ? 1 : 0}"
+
   triggers = {
     azurerm_function_app_id     = "${azurerm_function_app.azurerm_function_app.id}"
     azurerm_resource_group_name = "${azurerm_resource_group.azurerm_resource_group.name}"
-    azurerm_apim_id             = "${null_resource.azurerm_apim.id}"
+    azurerm_apim_id             = "${azurerm_api_management.azurerm_apim.id}"
     provisioner_version         = "1"
   }
 
@@ -1081,6 +1171,13 @@ resource "null_resource" "azurerm_apim_api" {
       "--apim_include_policies",
       "--apim_include_products"))
     }"
+
+    environment = {
+      ENVIRONMENT = "${var.environment}"
+      TF_VAR_ADB2C_TENANT_ID = "${var.ADB2C_TENANT_ID}"
+      TF_VAR_DEV_PORTAL_CLIENT_ID = "${data.azurerm_key_vault_secret.dev_portal_client_id.value}"
+      TF_VAR_DEV_PORTAL_CLIENT_SECRET = "${data.azurerm_key_vault_secret.dev_portal_client_secret.value}"
+    }
   }
 }
 
