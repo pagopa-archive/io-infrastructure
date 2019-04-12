@@ -687,7 +687,7 @@ resource "azurerm_function_app" "azurerm_function_app" {
       name  = "COSMOSDB_URI"
       type  = "Custom"
       value = "https://${azurerm_cosmosdb_account.azurerm_cosmosdb.name}.documents.azure.com:443/"
-    },
+    }
   ]
 }
 
