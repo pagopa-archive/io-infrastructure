@@ -1262,6 +1262,13 @@ resource "azurerm_redis_cache" "azurerm_redis_cache" {
     rdb_storage_connection_string = "${azurerm_storage_account.azurerm_redis_backup.primary_connection_string}"
   }
 
+  # NOTE: There's a bug in the Redis API where the original storage connection string isn't being returned,
+  # which is being tracked here [https://github.com/Azure/azure-rest-api-specs/issues/3037].
+  # In the interim we use the ignore_changes attribute to ignore changes to this field.
+  lifecycle {
+    ignore_changes = ["redis_configuration.0.rdb_storage_connection_string"]
+  }
+
   subnet_id = "${data.azurerm_subnet.azurerm_redis_cache.id}"
 
   # must be inside azurerm_virtual_network.azurerm_redis_cache address space
