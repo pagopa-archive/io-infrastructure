@@ -268,10 +268,6 @@ variable "apim_api_provisioner" {
   default = "local-provisioners/azurerm_apim_api.ts"
 }
 
-variable "app_service_portal_provisioner" {
-  default = "local-provisioners/azurerm_app_service_portal.ts"
-}
-
 variable "functionapp_apikey_provisioner" {
   default = "local-provisioners/azurerm_functionapp_apikey.ts"
 }
@@ -322,8 +318,6 @@ locals {
   azurerm_functionapp_name                  = "${var.azurerm_resource_name_prefix}-functions-${var.environment_short}"
   azurerm_functionapp_storage_account_name  = "${var.azurerm_resource_name_prefix}funcstorage${var.environment_short}"
   azurerm_application_insights_name         = "${var.azurerm_resource_name_prefix}-appinsights-${var.environment_short}"
-  azurerm_app_service_plan_portal_name      = "${var.azurerm_resource_name_prefix}-portal-app-${var.environment_short}"
-  azurerm_app_service_portal_name           = "${var.azurerm_resource_name_prefix}-portal-${var.environment_short}"
   azurerm_log_analytics_name                = "${var.azurerm_resource_name_prefix}-loganalytics-${var.environment_short}"
   azurerm_apim_name                         = "${var.azurerm_resource_name_prefix}-apim-${var.environment_short}"
   azurerm_eventhub_ns_name                  = "${var.azurerm_resource_name_prefix}-eventhub-ns-${var.environment_short}"
@@ -723,176 +717,8 @@ resource "null_resource" "azurerm_function_app_git" {
   }
 }
 
-resource "null_resource" "azurerm_function_app_apikey" {
-  triggers = {
-    azurerm_functionapp_id = "${azurerm_function_app.azurerm_function_app.id}"
-
-    # increment the following value when changing the provisioner script to
-    # trigger the re-execution of the script
-    # TODO: consider using the hash of the script content instead
-    provisioner_version = "1"
-  }
-
-  depends_on = ["null_resource.azurerm_app_service_portal"]
-
-  provisioner "local-exec" {
-    command = "${join(" ", list(
-      "ts-node ${var.functionapp_apikey_provisioner}",
-      "--environment ${var.environment}",
-      "--azurerm_resource_group ${azurerm_resource_group.azurerm_resource_group.name}",
-      "--azurerm_apim ${local.azurerm_apim_name}",
-      "--apim_configuration_path ${var.apim_configuration_path}",
-      "--azurerm_functionapp ${azurerm_function_app.azurerm_function_app.name}"))
-    }"
-
-    environment = {
-      ENVIRONMENT = "${var.environment}"
-      TF_VAR_ADB2C_TENANT_ID = "${var.ADB2C_TENANT_ID}"
-      TF_VAR_DEV_PORTAL_CLIENT_ID = "${data.azurerm_key_vault_secret.dev_portal_client_id.value}"
-      TF_VAR_DEV_PORTAL_CLIENT_SECRET = "${data.azurerm_key_vault_secret.dev_portal_client_secret.value}"
-    }
-  }
-}
-
-### DEVELOPER PORTAL TASKS
-
-resource "azurerm_app_service_plan" "azurerm_app_service_plan_portal" {
-  name                = "${local.azurerm_app_service_plan_portal_name}"
-  location            = "${azurerm_resource_group.azurerm_resource_group.location}"
-  resource_group_name = "${azurerm_resource_group.azurerm_resource_group.name}"
-
-  sku {
-    tier = "Standard"
-
-    # see https://azure.microsoft.com/en-en/pricing/details/app-service/
-    size = "S1"
-  }
-}
-
-resource "random_string" "cookie_key" {
-  length = 32
-}
-
-resource "random_string" "cookie_iv" {
-  length = 12
-}
-
-resource "azurerm_app_service" "azurerm_app_service_portal" {
-  name                = "${local.azurerm_app_service_portal_name}"
-  location            = "${azurerm_resource_group.azurerm_resource_group.location}"
-  resource_group_name = "${azurerm_resource_group.azurerm_resource_group.name}"
-  app_service_plan_id = "${azurerm_app_service_plan.azurerm_app_service_plan_portal.id}"
-
-  site_config {
-    always_on = true
-  }
-
-  # Go to https://github.com/teamdigitale/digital-citizenship-onboarding
-  # to see how to fill these values
-  app_settings {
-    POLICY_NAME                  = "${var.azurerm_adb2c_policy}"
-    WEBSITE_NODE_DEFAULT_VERSION = "6.5.0"
-    COOKIE_KEY                   = "${random_string.cookie_key.result}"
-    COOKIE_IV                    = "${random_string.cookie_iv.result}"
-    LOG_LEVEL                    = "debug"
-    ARM_RESOURCE_GROUP           = "${azurerm_resource_group.azurerm_resource_group.name}"
-    ARM_APIM                     = "${local.azurerm_apim_name}"
-    APIM_PRODUCT_NAME            = "starter"
-    APIM_USER_GROUPS             = "ApiLimitedMessageWrite,ApiInfoRead,ApiMessageRead,ApiLimitedProfileRead"
-    ADMIN_API_URL                = "https://${local.azurerm_apim_name}.azure-api.net/"
-    POST_LOGIN_URL               = "${var.app_service_portal_post_login_url}"
-    POST_LOGOUT_URL              = "${var.app_service_portal_post_logout_url}"
-    REPLY_URL                    = "https://${local.azurerm_app_service_portal_name}.azurewebsites.net/auth/openid/return"
-
-    ARM_SUBSCRIPTION_ID = "${data.azurerm_client_config.current.subscription_id}"
-    TENANT_ID           = "${var.ADB2C_TENANT_ID}"
-    CLIENT_ID           = "${var.DEV_PORTAL_EXT_CLIENT_ID}"
-    CLIENT_SECRET       = "${var.DEV_PORTAL_EXT_CLIENT_SECRET}"
-
-    APPINSIGHTS_PORTALINFO = "Node"
-    WEBSITE_DISABLE_MSI    = "false"
-
-    # Prevent Terraform to override these values
-    APPINSIGHTS_INSTRUMENTATIONKEY = ""
-    ADMIN_API_KEY                  = ""
-  }
-
-  lifecycle {
-    ignore_changes = [
-      # FIXME: this is configured on the Azure portal as "External Git" but the
-      #        Azure provider supports only "None" and "Local Git"
-      "site_config.0.scm_type"
-    ]
-  }
-}
-
-# Creates a new administrator user and setup the API-Key (of this user)
-# in the developer portal onboarding web application,
-# see https://github.com/teamdigitale/digital-citizenship-onboarding
-resource "null_resource" "azurerm_app_service_portal" {
-  triggers = {
-    azurerm_app_service_portal_id = "${azurerm_app_service.azurerm_app_service_portal.id}"
-    provisioner_version           = "1"
-  }
-
-  depends_on = ["null_resource.azurerm_apim", "azurerm_function_app.azurerm_function_app", "azurerm_app_service.azurerm_app_service_portal"]
-
-  provisioner "local-exec" {
-    command = "${join(" ", list(
-      "ts-node ${var.app_service_portal_provisioner}",
-      "--environment ${var.environment}",
-      "--azurerm_resource_group ${azurerm_resource_group.azurerm_resource_group.name}",
-      "--azurerm_apim ${local.azurerm_apim_name}",
-      "--apim_configuration_path ${var.apim_configuration_path}",
-      "--azurerm_app_service_portal ${azurerm_app_service.azurerm_app_service_portal.name}",
-      "--azurerm_cosmosdb ${azurerm_cosmosdb_account.azurerm_cosmosdb.name}",
-      "--azurerm_documentdb ${local.azurerm_cosmosdb_documentdb_name}",
-      "--azurerm_cosmosdb_key ${azurerm_cosmosdb_account.azurerm_cosmosdb.primary_master_key}"))
-    }"
-
-    environment = {
-      ENVIRONMENT = "${var.environment}"
-      TF_VAR_ADB2C_TENANT_ID = "${var.ADB2C_TENANT_ID}"
-      TF_VAR_DEV_PORTAL_CLIENT_ID = "${data.azurerm_key_vault_secret.dev_portal_client_id.value}"
-      TF_VAR_DEV_PORTAL_CLIENT_SECRET = "${data.azurerm_key_vault_secret.dev_portal_client_secret.value}"
-    }
-  }
-}
-
-resource "null_resource" "azurerm_app_service_portal_git" {
-  triggers = {
-    azurerm_app_service_portal_id = "${azurerm_app_service.azurerm_app_service_portal.id}"
-
-    # trigger recreation of this resource when the following variables change
-    app_service_portal_git_repo   = "${var.app_service_portal_git_repo}"
-    app_service_portal_git_branch = "${var.app_service_portal_git_branch}"
-
-    # increment the following value when changing the provisioner script to
-    # trigger the re-execution of the script
-    # TODO: consider using the hash of the script content instead
-    provisioner_version = "1"
-  }
-
-  provisioner "local-exec" {
-    command = "${join(" ", list(
-      "ts-node ${var.website_git_provisioner}",
-      "--resource-group-name ${azurerm_resource_group.azurerm_resource_group.name}",
-      "--app-name ${azurerm_app_service.azurerm_app_service_portal.name}",
-      "--git-repo ${var.app_service_portal_git_repo}",
-      "--git-branch ${var.app_service_portal_git_branch}"))
-    }"
-
-    environment = {
-      ENVIRONMENT = "${var.environment}"
-      TF_VAR_ADB2C_TENANT_ID = "${var.ADB2C_TENANT_ID}"
-      TF_VAR_DEV_PORTAL_CLIENT_ID = "${data.azurerm_key_vault_secret.dev_portal_client_id.value}"
-      TF_VAR_DEV_PORTAL_CLIENT_SECRET = "${data.azurerm_key_vault_secret.dev_portal_client_secret.value}"
-    }
-  }
-}
-
 locals {
-  application_outbound_ips = "${var.azurerm_shared_address_space_cidr},${azurerm_function_app.azurerm_function_app.outbound_ip_addresses},${azurerm_app_service.azurerm_app_service_portal.outbound_ip_addresses},${var.azurerm_azure_portal_ips}"
+  application_outbound_ips = "${var.azurerm_shared_address_space_cidr},${azurerm_function_app.azurerm_function_app.outbound_ip_addresses},${var.azurerm_azure_portal_ips}"
 }
 
 resource "null_resource" "azurerm_cosmosdb_ip_range_filter" {
@@ -1062,7 +888,6 @@ resource "null_resource" "azurerm_apim" {
       "--azurerm_apim ${azurerm_api_management.azurerm_apim.name}",
       "--azurerm_apim_scm_url ${azurerm_api_management.azurerm_apim.scm_url}",
       "--azurerm_functionapp ${azurerm_function_app.azurerm_function_app.name}",
-      "--azurerm_app_service_portal ${local.azurerm_app_service_portal_name}",
       "--apim_configuration_path ${var.apim_configuration_path}"))
     }"
 
