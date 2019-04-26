@@ -5,10 +5,6 @@ provider "azurerm" {
   version = "~> 1.24"
 }
 
-provider "random" {
-  version = "~> 1.1"
-}
-
 provider "null" {
   version = "~> 1.0"
 }
