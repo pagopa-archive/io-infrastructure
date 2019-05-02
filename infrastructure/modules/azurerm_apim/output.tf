@@ -3,6 +3,6 @@ output "id" {
   value       = "${azurerm_api_management.azurerm_apim.*.id}"
 }
 
-output "gateway_url " {
-   value = ""
+output "gateway_url" {
+  value = "${azurerm_api_management.azurerm_apim.*.gateway_url}"
 }
