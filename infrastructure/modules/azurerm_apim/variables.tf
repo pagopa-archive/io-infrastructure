@@ -1,6 +1,6 @@
 variable "create" {
   description = "Controls if terraform resources should be created (it affects almost all resources)"
-  default     = true
+  default = true
 }
 
 variable "environment" {
@@ -27,7 +27,10 @@ variable "ADB2C_TENANT_ID" {
   description = "Name of the Active Directory B2C tenant used in the API management portal authentication flow"
   default     = "agidweb"
 }
+<<<<<<< HEAD
 
+=======
+>>>>>>> 42a8218922e926da89c74396b34b96a9e107e4fe
 variable "apim_configuration_path" {
   default     = "common/apim.json"
   description = "Path of the (json) file that contains the configuration settings for the API management resource"
@@ -43,6 +46,10 @@ variable "resource_group_name" {
   description = "Resource group name"
 }
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 42a8218922e926da89c74396b34b96a9e107e4fe
 variable "publisher_email" {
   type        = "string"
   description = "Publisher email address"
@@ -56,12 +63,13 @@ variable "publisher_name" {
 variable "sku_name" {
   type        = "string"
   description = ""
-  default     = "Consumption"
+  default = "Consumption"
 }
+
 
 variable "sku_capacity" {
   description = ""
-  default     = 1
+  default = 1
 }
 
 variable "key_vault_id" {
@@ -70,4 +78,4 @@ variable "key_vault_id" {
 
 variable "azurerm_function_app_name" {
   default = "undefined"
-}
+ }

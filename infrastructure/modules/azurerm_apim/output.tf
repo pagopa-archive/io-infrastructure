@@ -4,5 +4,5 @@ output "id" {
 }
 
 output "gateway_url " {
-  value = ""
+   value = ""
 }
