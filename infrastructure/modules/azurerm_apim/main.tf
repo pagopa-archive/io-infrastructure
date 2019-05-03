@@ -2,23 +2,51 @@
 
 ## Create and configure the API management service
 
-resource "azurerm_api_management" "azurerm_apim" {
-  count = "${var.create ? 1 : 0}"
+# resource "azurerm_api_management" "azurerm_apim" {
+#   count = "${var.create ? 1 : 0}"
 
-  name                      = "${local.azurerm_apim_name}"
-  location                  = "${var.location}"
-  resource_group_name       = "${var.resource_group_name}"
-  publisher_name            = "${var.publisher_name}"
-  publisher_email           = "${var.publisher_email}"
-  notification_sender_email = "${var.notification_sender_email}"
+#   name                      = "${local.azurerm_apim_name}"
+#   location                  = "${var.location}"
+#   resource_group_name       = "${var.resource_group_name}"
+#   publisher_name            = "${var.publisher_name}"
+#   publisher_email           = "${var.publisher_email}"
+#   notification_sender_email = "${var.notification_sender_email}"
+
+#   sku {
+#     name     = "${var.sku_name}"
+#     capacity = "${var.sku_capacity}"
+#   }
+
+#   hostname_configuration {}
+# }
+
+module "azurerm_api_management" {
+  source              = "innovationnorway/resource/azurerm"
+  api_version         = "2019-01-01"
+  type                = "Microsoft.ApiManagement/service/apis"
+  name                = "${local.azurerm_apim_name}"
+  resource_group_name = "${var.resource_group_name}"
+  location            = "${var.location}"
+
+  properties {
+    publisherEmail = "${var.publisher_email}"
+    publisherName  = "${var.publisher_name}"
+    virtualNetworkType = "internal"
+    virtualNetworkConfiguration = {
+      subnetResourceId = "/subscriptions/ec285037-c673-4f58-b594-d7c480da4e8b/resourceGroups/agid-rg-test/providers/Microsoft.Network/virtualNetworks/agid-redis-vnet-test/subnets/default"
+    }
+  }
 
   sku {
     name     = "${var.sku_name}"
     capacity = "${var.sku_capacity}"
   }
-
-  hostname_configuration {}
 }
+
+# data "azurerm_api_management" "azurerm_apim" {
+#   name                = "${local.azurerm_apim_name}"
+#   resource_group_name = "${var.resource_group_name}"
+# }
 
 resource "null_resource" "azurerm_apim" {
   count = "${var.create ? 1 : 0}"
@@ -34,8 +62,8 @@ resource "null_resource" "azurerm_apim" {
       "ts-node azurerm_apim.ts",
       "--environment ${var.environment}",
       "--azurerm_resource_group ${var.resource_group_name}",
-      "--azurerm_apim ${azurerm_api_management.azurerm_apim.name}",
-      "--azurerm_apim_scm_url ${azurerm_api_management.azurerm_apim.scm_url}",
+      "--azurerm_apim ${local.azurerm_apim_name}",
+      "--azurerm_apim_scm_url git",
       "--azurerm_functionapp ${var.azurerm_function_app_name}",
       "--apim_configuration_path ${var.apim_configuration_path}"))
     }"
