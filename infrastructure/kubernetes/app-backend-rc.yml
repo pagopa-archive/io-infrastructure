@@ -28,7 +28,7 @@ spec:
         app: app-backend-rc
     spec:
       containers:
-      - image: "teamdigitale/italia-backend:v1.0.0-rc4"
+      - image: "teamdigitale/italia-backend:v1.0.0-rc5"
         name: app-backend-rc
         ports:
         - name: http-port
