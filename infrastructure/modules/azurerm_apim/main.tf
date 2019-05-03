@@ -21,7 +21,7 @@
 # }
 
 module "azurerm_api_management" {
-  source              = "innovationnorway/resource/azurerm"
+  source              = "../terraform-azurerm-resource"
   api_version         = "2019-01-01"
   type                = "Microsoft.ApiManagement/service/apis"
   name                = "${local.azurerm_apim_name}"
@@ -63,7 +63,7 @@ resource "null_resource" "azurerm_apim" {
       "--environment ${var.environment}",
       "--azurerm_resource_group ${var.resource_group_name}",
       "--azurerm_apim ${local.azurerm_apim_name}",
-      "--azurerm_apim_scm_url git",
+      "--azurerm_apim_scm_url ${lookup(module.azurerm_api_management.outputs, "scm_url")}",
       "--azurerm_functionapp ${var.azurerm_function_app_name}",
       "--apim_configuration_path ${var.apim_configuration_path}"))
     }"
