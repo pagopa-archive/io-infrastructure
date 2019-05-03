@@ -1,0 +1,122 @@
+#
+# The app proxy
+#
+---
+#
+# Deploy the pods
+#
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: app-backend-rc
+  namespace: default
+  labels:
+    app: app-backend-rc
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 50%
+      maxSurge: 1
+  revisionHistoryLimit: 10
+  template:
+    metadata:
+      name: app-backend-rc
+      namespace: default
+      labels:
+        app: app-backend-rc
+    spec:
+      containers:
+      - image: "teamdigitale/italia-backend:v1.0.0-rc4"
+        name: app-backend-rc
+        ports:
+        - name: http-port
+          containerPort: 80
+        env:
+        - name: "ALLOW_NOTIFY_IP_SOURCE_RANGE"
+          value: "0.0.0.0/0"
+        - name: "ALLOW_PAGOPA_IP_SOURCE_RANGE"
+          value: "0.0.0.0/0"
+        - name: "API_BASE_PATH"
+          value: "/api/v1"
+        - name: "API_URL"
+          value: "https://api.cd.italia.it/api/v1"
+        - name: "API_KEY"
+          valueFrom:
+            secretKeyRef:
+              name: app-backend-secrets
+              key: api_key
+        - name: "AUTHENTICATION_BASE_PATH"
+          value: ""
+        - name: "AZURE_NH_ENDPOINT"
+          valueFrom:
+            secretKeyRef:
+              name: app-backend-secrets
+              key: azure_nh_endpoint
+        - name: "AZURE_NH_HUB_NAME"
+          value: "agid-notificationhub-test"
+        - name: "NODE_ENV"
+          value: "development"
+        - name: "PAGOPA_BASE_PATH"
+          value: "/pagopa/api/v1"
+        - name: "PAGOPA_API_URL"
+          value: "http://pagopa-proxy"
+        - name: "PRE_SHARED_KEY"
+          valueFrom:
+            secretKeyRef:
+              name: app-backend-secrets
+              key: pre_shared_key
+        - name: "REDIS_URL"
+          value: "agid-redis-test.redis.cache.windows.net"
+        - name: "REDIS_PORT"
+          value: "6380"
+        - name: "REDIS_PASSWORD"
+          valueFrom:
+            secretKeyRef:
+              name: app-backend-secrets
+              key: redis_password
+        - name: "SAML_CALLBACK_URL"
+          value: "https://app-backend.k8s.test.cd.teamdigitale.it/assertionConsumerService"
+        - name: "SAML_ISSUER"
+          value: "https://spid.agid.gov.it/cd"
+        - name: "SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX"
+          value: "0"
+        - name: "SPID_TESTENV_URL"
+          value: "https://spid-testenv2.k8s.test.io.italia.it"
+        - name: "TOKEN_DURATION_IN_SECONDS"
+          # 30 days
+          value: "2592000"
+        volumeMounts:
+          - name: certs
+            mountPath: "/usr/src/app/certs"
+            readOnly: true
+        livenessProbe:
+          httpGet:
+            path: "/ping"
+            port: 80
+          initialDelaySeconds: 30
+          timeoutSeconds: 5
+          periodSeconds: 10
+          failureThreshold: 5
+      volumes:
+      - name: certs
+        secret:
+          # cert.pem, key.pem
+          secretName: spid-cert
+
+---
+#
+# A service exposing the app to the cluster.
+#
+apiVersion: v1
+kind: Service
+metadata:
+  name: app-backend-rc
+  namespace: default
+spec:
+  selector:
+    app: app-backend-rc
+  ports:
+    - protocol: TCP
+      port: 80
