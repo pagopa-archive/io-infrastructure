@@ -28,7 +28,7 @@ spec:
         app: app-backend-rc
     spec:
       containers:
-      - image: "teamdigitale/italia-backend:v1.0.0-rc8"
+      - image: "teamdigitale/italia-backend:v1.0.1"
         name: app-backend-rc
         ports:
         - name: http-port
@@ -62,6 +62,8 @@ spec:
           value: "/pagopa/api/v1"
         - name: "PAGOPA_API_URL"
           value: "http://pagopa-proxy"
+        - name: "PAGOPA_API_URL_TEST"
+          value: "http://pagopa-proxy-test"
         - name: "PRE_SHARED_KEY"
           valueFrom:
             secretKeyRef:

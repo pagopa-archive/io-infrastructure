@@ -75,6 +75,15 @@ deployment "app-backend" configured
 service "app-backend" configured
 ```
 
+## Cluster nodePorts
+
+Some services are exposed with nodePorts:
+
+|service|node port|notes|
+|-------|---------|-----|
+|pagopa-proxy|30010|pagoPA proxy (production environment)|
+|pagopa-proxy|30020|pagoPA proxy (test environment)|
+
 ## Additional components
 
 ### Installing Helm

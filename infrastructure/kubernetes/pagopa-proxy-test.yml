@@ -1,0 +1,111 @@
+#
+# The pagopa-proxy
+#
+---
+#
+# Deploy the pods
+#
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: pagopa-proxy-test
+  namespace: default
+  labels:
+    app: pagopa-proxy-test
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 50%
+      maxSurge: 1
+  revisionHistoryLimit: 10
+  template:
+    metadata:
+      name: pagopa-proxy-test
+      namespace: default
+      labels:
+        app: pagopa-proxy-test
+    spec:
+      containers:
+      - image: "teamdigitale/italia-pagopa-proxy:v0.8.11"
+        name: pagopa-proxy-test
+        ports:
+        - name: http-port
+          containerPort: 80
+        env:
+        - name: "WINSTON_LOG_LEVEL"
+          value: "debug"
+        - name: "PAGOPAPROXY_HOST"
+          value: "localhost"
+        - name: "PAGOPAPROXY_PORT"
+          value: "80"
+        - name: "PAGOPA_HOST"
+          value: "http://10.250.1.182"
+        - name: "PAGOPA_PORT"
+          value: "80"
+        - name: "PAGOPA_HOST_HEADER"
+          value: "nodopa.te.sia.eu"
+        - name: "PAGOPA_PASSWORD"
+          valueFrom:
+            secretKeyRef:
+              name: pagopa-proxy-test
+              key: pagopa_password
+        - name: "PAGOPA_ID_PSP"
+          valueFrom:
+            secretKeyRef:
+              name: pagopa-proxy-test
+              key: id_psp
+        - name: "PAGOPA_ID_INT_PSP"
+          valueFrom:
+            secretKeyRef:
+              name: pagopa-proxy-test
+              key: id_intermediario_psp
+        - name: "PAGOPA_ID_CANALE"
+          valueFrom:
+            secretKeyRef:
+              name: pagopa-proxy-test
+              key: id_canale
+        - name: "PAGOPA_ID_CANALE_PAGAMENTO"
+          valueFrom:
+            secretKeyRef:
+              name: pagopa-proxy-test
+              key: id_canale_pagamento
+        - name: "PAGOPA_TIMEOUT_MSEC"
+          value: "500000"
+        - name: "REDIS_DB_URL"
+          value: "agid-redis-test.redis.cache.windows.net"
+        - name: "REDIS_DB_PORT"
+          value: "6380"
+        - name: "REDIS_DB_PASSWORD"
+          valueFrom:
+            secretKeyRef:
+              name: pagopa-proxy-test
+              key: redis_password
+        - name: "REDIS_USE_CLUSTER"
+          value: "true"
+        livenessProbe:
+          httpGet:
+            path: "/ping"
+            port: 80
+          initialDelaySeconds: 30
+          timeoutSeconds: 5
+          periodSeconds: 10
+          failureThreshold: 5
+---
+#
+# A service exposing the pagopa-proxy to the cluster.
+#
+apiVersion: v1
+kind: Service
+metadata:
+  name: pagopa-proxy-test
+  namespace: default
+spec:
+  type: NodePort
+  selector:
+    app: pagopa-proxy-test
+  ports:
+    - protocol: TCP
+      port: 80
+      nodePort: 30020
