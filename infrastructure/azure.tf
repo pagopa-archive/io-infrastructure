@@ -860,9 +860,9 @@ module "azurerm_apim_internal" {
   publisher_name      = "Digital Citizenship"
   publisher_email     = "apim@agid.gov.it"
   notification_sender_email = "apim@agid.gov.it"
-azurerm_function_app_name = "${azurerm_function_app.azurerm_function_app.name}"
+  azurerm_function_app_name = "${azurerm_function_app.azurerm_function_app.name}"
 
-key_vault_id = "${var.key_vault_id}"
+  key_vault_id = "${var.key_vault_id}"
   sku_name = "Developer"
   # sku_capacity = 1
 }
