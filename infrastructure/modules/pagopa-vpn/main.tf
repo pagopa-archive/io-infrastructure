@@ -24,7 +24,7 @@ locals {
 
   # The port the AKS nodes where the CD service will listen for requests from
   # the pagoPA nodes
-  aks_nodeport = "30010"
+  aks_nodeport = "30010-30020"
 
   # We need at leat VpnGw1 SKU (the Basic SKU doesn't support custom IPSec policy)
   vpn_sku = "VpnGw1"
@@ -39,7 +39,7 @@ locals {
   loadbalancer_playbook_url = "https://raw.githubusercontent.com/teamdigitale/${local.loadbalancer_playbook_repo_name}"
 
   # loadbalancer playbook archive version
-  loadbalancer_playbook_version = "0.0.14"
+  loadbalancer_playbook_version = "0.0.15"
 
   # Precompute resource names based on naming convention
   virtual_network_name                    = "${var.azurerm_resource_name_prefix}-ppa-vpn-vnet-${var.environment_short}"
