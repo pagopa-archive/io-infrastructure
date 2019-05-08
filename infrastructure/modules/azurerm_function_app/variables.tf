@@ -18,7 +18,7 @@ variable "resource_name_prefix" {
 locals {
   # Define resource names based on the following convention:
   # {azurerm_resource_name_prefix}-RESOURCE_TYPE-{environment}
-  azurerm_functionapp_name = "${var.resource_name_prefix}-apim-${var.environment}"
+  azurerm_functionapp_name = "${var.resource_name_prefix}-functions-${var.environment}"
 
   azurerm_functionapp_storage_account_name = "${var.resource_name_prefix}funcstorage${var.environment}"
   azurerm_app_service_plan_name             = "${var.resource_name_prefix}-app-${var.environment}"
