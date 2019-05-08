@@ -29,12 +29,13 @@ module "azurerm_api_management" {
   location            = "${var.location}"
 
   properties {
-    publisherEmail = "${var.publisher_email}"
-    publisherName  = "${var.publisher_name}"
-    virtualNetworkType = "internal"
-    virtualNetworkConfiguration = {
-      subnetResourceId = "/subscriptions/ec285037-c673-4f58-b594-d7c480da4e8b/resourceGroups/agid-rg-test/providers/Microsoft.Network/virtualNetworks/agid-redis-vnet-test/subnets/default"
-    }
+    publisherEmail     = "${var.publisher_email}"
+    publisherName      = "${var.publisher_name}"
+    # virtualNetworkType = "internal"
+
+    # virtualNetworkConfiguration = {
+    #   subnetResourceId = "/subscriptions/ec285037-c673-4f58-b594-d7c480da4e8b/resourceGroups/agid-rg-test/providers/Microsoft.Network/virtualNetworks/agid-redis-vnet-test/subnets/default"
+    # }
   }
 
   sku {

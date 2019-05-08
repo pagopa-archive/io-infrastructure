@@ -1,16 +1,18 @@
 ## Create and configure the API management service
 module "azurerm_function_app" {
-    source               = "./modules/azurerm_function_app"
-    environment          = "${var.environment_short}"
-    resource_name_prefix = "${var.azurerm_resource_name_prefix}"
-    location             = "${azurerm_resource_group.azurerm_resource_group.location}"
-    resource_group_name  = "${azurerm_resource_group.azurerm_resource_group.name}"
-       azurerm_functionapp_git_repo   = "${var.azurerm_functionapp_git_repo}"
-    azurerm_functionapp_git_branch = "${var.azurerm_functionapp_git_branch}"
-    website_git_provisioner = "${var.website_git_provisioner}"
+  source      = "./modules/azurerm_function_app"
+  environment = "${var.environment_short}"
+
+  resource_name_prefix           = "temp${var.azurerm_resource_name_prefix}"
+  location                       = "${azurerm_resource_group.azurerm_resource_group.location}"
+  resource_group_name            = "${azurerm_resource_group.azurerm_resource_group.name}"
+  azurerm_functionapp_git_repo   = "${var.azurerm_functionapp_git_repo}"
+  azurerm_functionapp_git_branch = "${var.azurerm_functionapp_git_branch}"
+  website_git_provisioner        = "${var.website_git_provisioner}"
 
   key_vault_id = "${var.key_vault_id}"
-    app_settings = {
+
+  app_settings = {
     # "AzureWebJobsStorage" = "${azurerm_storage_account.azurerm_functionapp_storage_account.primary_connection_string}"
 
     "COSMOSDB_NAME" = "${local.azurerm_cosmosdb_documentdb_name}"
@@ -50,44 +52,50 @@ module "azurerm_function_app" {
     # API management API-Key (Ocp-Apim-Subscription-Key)
     # set the value manually or with a local provisioner
     "PUBLIC_API_KEY" = "${data.azurerm_key_vault_secret.functions_public_api_key.value}"
-    }
+  }
 
-    connection_string = [
-    {
-    name  = "COSMOSDB_KEY"
-    type  = "Custom"
-    value = "${azurerm_cosmosdb_account.azurerm_cosmosdb.primary_master_key}"
-    },
-    {
-    name  = "COSMOSDB_URI"
-    type  = "Custom"
-    value = "https://${azurerm_cosmosdb_account.azurerm_cosmosdb.name}.documents.azure.com:443/"
-    },
-    ]
+  # Connection String for cosmos access
 
-  #   key_vault_id = "${var.key_vault_id}"
+
+  # connection_string = [
+  # {
+  # name  = "COSMOSDB_KEY"
+  # type  = "Custom"
+  # value = "${azurerm_cosmosdb_account.azurerm_cosmosdb.primary_master_key}"
+  # },
+  # {
+  # name  = "COSMOSDB_URI"
+  # type  = "Custom"
+  # value = "https://${azurerm_cosmosdb_account.azurerm_cosmosdb.name}.documents.azure.com:443/"
+  # },
+  # ]
+
+  # Workaround for terraform limit when managing list of map variables
+  cosmosdb_key = "${azurerm_cosmosdb_account.azurerm_cosmosdb.primary_master_key}"
+  cosmosdb_uri = "https://${azurerm_cosmosdb_account.azurerm_cosmosdb.name}.documents.azure.com:443/"
+
   #   sku_name = "Developer"
   #   # sku_capacity = 1
 }
 
-
 module "azurerm_apim_internal" {
-  source = "./modules/azurerm_apim"
-  environment                     = "${var.environment_short}"
+  source      = "./modules/azurerm_apim"
+  environment = "${var.environment_short}"
+
   # name                = "${local.azurerm_apim_name}"
   resource_name_prefix = "${var.azurerm_resource_name_prefix}"
-  location            = "${azurerm_resource_group.azurerm_resource_group.location}"
-  resource_group_name = "${azurerm_resource_group.azurerm_resource_group.name}"
-  
+  location             = "${azurerm_resource_group.azurerm_resource_group.location}"
+  resource_group_name  = "${azurerm_resource_group.azurerm_resource_group.name}"
+
   # service_principal_client_id     = "${data.azurerm_client_config.current.client_id}"
   # service_principal_client_secret = "${var.ARM_CLIENT_SECRET}"
 
-  publisher_name      = "Digital Citizenship"
-  publisher_email     = "apim@agid.gov.it"
+  publisher_name            = "Digital Citizenship"
+  publisher_email           = "apim@agid.gov.it"
   notification_sender_email = "apim@agid.gov.it"
   azurerm_function_app_name = "${azurerm_function_app.azurerm_function_app.name}"
-
   key_vault_id = "${var.key_vault_id}"
-  sku_name = "Developer"
+  sku_name     = "Developer"
+
   # sku_capacity = 1
 }

@@ -20,8 +20,22 @@ resource "azurerm_function_app" "azurerm_function_app" {
   # Do not set "AzureWebJobsDashboard" to disable builtin logging
   # see https://docs.microsoft.com/en-us/azure/azure-functions/functions-monitoring#disable-built-in-logging
 
-  app_settings      = "${var.app_settings}"
-  connection_string = "${var.connection_string}"
+  app_settings = "${var.app_settings}"
+
+  # connection_string = ["${var.connection_string}"]
+
+  connection_string = [
+    {
+      name  = "COSMOSDB_KEY"
+      type  = "Custom"
+      value = "${var.cosmosdb_key}"
+    },
+    {
+      name  = "COSMOSDB_URI"
+      type  = "Custom"
+      value = "${var.cosmosdb_uri}"
+    },
+  ]
 }
 
 # Client ID of an application used in the API management portal authentication flow
