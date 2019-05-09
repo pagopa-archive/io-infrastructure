@@ -27,6 +27,7 @@ variable "ADB2C_TENANT_ID" {
   description = "Name of the Active Directory B2C tenant used in the API management portal authentication flow"
   default     = "agidweb"
 }
+
 # TODO: needs refactoring
 variable "apim_configuration_path" {
   default     = "common/apim.json"
@@ -70,21 +71,18 @@ variable "key_vault_id" {
 
 variable "azurerm_function_app_name" {
   description = "Function app name"
-  default = "undefined"
+  default     = "undefined"
 }
 
 variable "virtualNetworkType" {
-  description ="The type of VPN in which API Management service needs to be configured in. None (Default Value) means the API Management service is not part of any Virtual Network, External means the API Management deployment is set up inside a Virtual Network having an Internet Facing Endpoint, and Internal means that API Management deployment is setup inside a Virtual Network having an Intranet Facing Endpoint only."
-   default = "external"
+  description = "The type of VPN in which API Management service needs to be configured in. None (Default Value) means the API Management service is not part of any Virtual Network, External means the API Management deployment is set up inside a Virtual Network having an Internet Facing Endpoint, and Internal means that API Management deployment is setup inside a Virtual Network having an Intranet Facing Endpoint only."
+  default     = "external"
 }
 
-
-
-
 variable "virtualNetworkConfiguration" {
-  description ="Configuration of a virtual network to which API Management service is deployed."
-    type        = "map"
-   default = {}
+  description = "Configuration of a virtual network to which API Management service is deployed."
+  type        = "map"
+  default     = {}
 }
 
 variable "tags" {
@@ -108,9 +106,7 @@ variable "customProperties" {
   default = {}
 }
 
-
-
 variable "provisioner_version" {
-  description = "Force re-provisioning of API Management Git configuration" 
-  default = "1"
+  description = "Force re-provisioning of API Management Git configuration"
+  default     = "1"
 }

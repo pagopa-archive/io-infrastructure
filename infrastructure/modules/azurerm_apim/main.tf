@@ -23,18 +23,18 @@
 module "azurerm_api_management" {
   source              = "../terraform-azurerm-resource"
   api_version         = "2019-01-01"
-  type                = "Microsoft.ApiManagement/service/apis"
+  type                = "Microsoft.ApiManagement/service"
   name                = "${local.azurerm_apim_name}"
   resource_group_name = "${var.resource_group_name}"
   location            = "${var.location}"
-  tags = "${var.tags}" 
+  # tags                = "${var.tags}"
 
   properties {
-    publisherEmail     = "${var.publisher_email}"
-    publisherName      = "${var.publisher_name}"
-    virtualNetworkType = "${var.virtualNetworkType}"
-    virtualNetworkConfiguration = "${var.virtualNetworkConfiguration}"
-customProperties = "${var.customProperties}"
+    publisherEmail              = "${var.publisher_email}"
+    publisherName               = "${var.publisher_name}"
+    virtualNetworkType          = "${var.virtualNetworkType}"
+    # virtualNetworkConfiguration = "${var.virtualNetworkConfiguration}"
+    # customProperties            = "${var.customProperties}"
   }
 
   sku {
@@ -43,6 +43,19 @@ customProperties = "${var.customProperties}"
   }
 }
 
+# locals {
+#   # Common tags to be assigned to all resources
+# "${merge(map("Name", (var.single_nat_gateway ? "${var.name}-${var.private_subnet_suffix}" : format("%s-${var.private_subnet_suffix}-%s", var.name, element(var.azs, count.index)))), var.tags, var.private_route_table_tags)}"
+#   apim_properties = {
+#     publisherEmail              = "${var.publisher_email}"
+#     publisherName               = "${var.publisher_name}"
+#     virtualNetworkType          = "${var.virtualNetworkType}"
+#     # TODO: need a conditional to remove name when value is null
+#     # virtualNetworkConfiguration = "${var.virtualNetworkConfiguration}"
+#     # customProperties            = "${var.customProperties}"
+#   }
+# }
+
 resource "null_resource" "azurerm_apim" {
   count = "${var.create ? 1 : 0}"
 
@@ -50,6 +63,7 @@ resource "null_resource" "azurerm_apim" {
     # azurerm_function_app_id     = "${azurerm_function_app.azurerm_function_app.id}"
     # azurerm_resource_group_name = "${azurerm_resource_group.azurerm_resource_group.name}"
     azurerm_function_app_name = "${var.azurerm_function_app_name}"
+
     provisioner_version = "${var.provisioner_version}"
   }
 
@@ -59,7 +73,7 @@ resource "null_resource" "azurerm_apim" {
       "--environment ${var.environment}",
       "--azurerm_resource_group ${var.resource_group_name}",
       "--azurerm_apim ${local.azurerm_apim_name}",
-      "--azurerm_apim_scm_url ${lookup(module.azurerm_api_management.outputs, "scm_url")}",
+      "--azurerm_apim_scm_url ${module.azurerm_api_management.outputs["properties.scmUrl"]}",
       "--azurerm_functionapp ${var.azurerm_function_app_name}",
       "--apim_configuration_path ${var.apim_configuration_path}"))
     }"
