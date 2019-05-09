@@ -27,15 +27,14 @@ module "azurerm_api_management" {
   name                = "${local.azurerm_apim_name}"
   resource_group_name = "${var.resource_group_name}"
   location            = "${var.location}"
+  tags = "${var.tags}" 
 
   properties {
     publisherEmail     = "${var.publisher_email}"
     publisherName      = "${var.publisher_name}"
-    # virtualNetworkType = "internal"
-
-    # virtualNetworkConfiguration = {
-    #   subnetResourceId = "/subscriptions/ec285037-c673-4f58-b594-d7c480da4e8b/resourceGroups/agid-rg-test/providers/Microsoft.Network/virtualNetworks/agid-redis-vnet-test/subnets/default"
-    # }
+    virtualNetworkType = "${var.virtualNetworkType}"
+    virtualNetworkConfiguration = "${var.virtualNetworkConfiguration}"
+customProperties = "${var.customProperties}"
   }
 
   sku {
@@ -44,18 +43,14 @@ module "azurerm_api_management" {
   }
 }
 
-# data "azurerm_api_management" "azurerm_apim" {
-#   name                = "${local.azurerm_apim_name}"
-#   resource_group_name = "${var.resource_group_name}"
-# }
-
 resource "null_resource" "azurerm_apim" {
   count = "${var.create ? 1 : 0}"
 
   triggers = {
     # azurerm_function_app_id     = "${azurerm_function_app.azurerm_function_app.id}"
     # azurerm_resource_group_name = "${azurerm_resource_group.azurerm_resource_group.name}"
-    provisioner_version = "2"
+    azurerm_function_app_name = "${var.azurerm_function_app_name}"
+    provisioner_version = "${var.provisioner_version}"
   }
 
   provisioner "local-exec" {

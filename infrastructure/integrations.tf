@@ -86,16 +86,17 @@ module "azurerm_apim_internal" {
   resource_name_prefix = "${var.azurerm_resource_name_prefix}"
   location             = "${azurerm_resource_group.azurerm_resource_group.location}"
   resource_group_name  = "${azurerm_resource_group.azurerm_resource_group.name}"
-
+virtualNetworkType = "internal"
+# virtualNetworkConfiguration = 
   # service_principal_client_id     = "${data.azurerm_client_config.current.client_id}"
   # service_principal_client_secret = "${var.ARM_CLIENT_SECRET}"
-
+provisioner_version = "2"
   publisher_name            = "Digital Citizenship"
   publisher_email           = "apim@agid.gov.it"
   notification_sender_email = "apim@agid.gov.it"
   azurerm_function_app_name = "${azurerm_function_app.azurerm_function_app.name}"
   key_vault_id = "${var.key_vault_id}"
-  sku_name     = "Developer"
+  sku_name     = "Premium"
 
   # sku_capacity = 1
 }
