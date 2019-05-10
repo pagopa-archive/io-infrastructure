@@ -69,14 +69,15 @@ resource "null_resource" "azurerm_apim" {
 
   provisioner "local-exec" {
     command = "${join(" ", list(
-      "ts-node azurerm_apim.ts",
+      "ts-node ${var.apim_provisioner}",
       "--environment ${var.environment}",
       "--azurerm_resource_group ${var.resource_group_name}",
       "--azurerm_apim ${local.azurerm_apim_name}",
-      "--azurerm_apim_scm_url ${module.azurerm_api_management.outputs["properties.scmUrl"]}",
+      "--azurerm_apim_scm_url https://${local.azurerm_apim_name}.scm.azure-api.net/",
       "--azurerm_functionapp ${var.azurerm_function_app_name}",
       "--apim_configuration_path ${var.apim_configuration_path}"))
     }"
+
 
     environment = {
       ENVIRONMENT                     = "${var.environment}"

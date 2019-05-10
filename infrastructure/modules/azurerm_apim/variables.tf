@@ -19,6 +19,7 @@ locals {
   # Define resource names based on the following convention:
   # {azurerm_resource_name_prefix}-RESOURCE_TYPE-{environment}
   azurerm_apim_name = "${var.resource_name_prefix}-apim-${var.environment}"
+  azurerm_apim_scmurl = "https://${var.resource_name_prefix}-apim-${var.environment}.scm.azure-api.net/"
 }
 
 # TF_VAR_ADB2C_TENANT_ID
@@ -110,3 +111,7 @@ variable "provisioner_version" {
   description = "Force re-provisioning of API Management Git configuration"
   default     = "1"
 }
+
+variable "apim_provisioner" {
+  default = "azurerm_apim.ts"
+ }
