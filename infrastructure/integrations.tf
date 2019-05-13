@@ -91,7 +91,7 @@ module "azurerm_apim_internal" {
   # virtualNetworkConfiguration = 
   # service_principal_client_id     = "${data.azurerm_client_config.current.client_id}"
   # service_principal_client_secret = "${var.ARM_CLIENT_SECRET}"
-  provisioner_version = "2"
+  provisioner_version = "3"
 
   publisher_name            = "Digital Citizenship"
   publisher_email           = "apim@agid.gov.it"

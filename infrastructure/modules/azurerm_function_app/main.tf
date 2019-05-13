@@ -66,7 +66,7 @@ resource "null_resource" "azurerm_function_app_git" {
 
   provisioner "local-exec" {
     command = "${join(" ", list(
-      "ts-node ${var.website_git_provisioner}",
+      "ts-node --files ${var.website_git_provisioner}",
       "--resource-group-name ${var.resource_group_name}",
       "--app-name ${azurerm_function_app.azurerm_function_app.name}",
       "--git-repo ${var.azurerm_functionapp_git_repo}",

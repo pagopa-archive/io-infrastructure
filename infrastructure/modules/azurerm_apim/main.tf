@@ -69,7 +69,7 @@ resource "null_resource" "azurerm_apim" {
 
   provisioner "local-exec" {
     command = "${join(" ", list(
-      "ts-node ${var.apim_provisioner}",
+      "ts-node --files ${var.apim_provisioner}",
       "--environment ${var.environment}",
       "--azurerm_resource_group ${var.resource_group_name}",
       "--azurerm_apim ${local.azurerm_apim_name}",

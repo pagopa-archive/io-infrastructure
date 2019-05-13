@@ -113,5 +113,5 @@ variable "provisioner_version" {
 }
 
 variable "apim_provisioner" {
-  default = "azurerm_apim.ts"
+  default = "local-provisioners/azurerm_apim.ts"
  }
