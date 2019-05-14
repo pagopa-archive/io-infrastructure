@@ -115,3 +115,10 @@ variable "provisioner_version" {
 variable "apim_provisioner" {
   default = "local-provisioners/azurerm_apim.ts"
  }
+
+ 
+ variable "apim_adb2c_provisioner" { }
+
+variable "apim_logger_provisioner" { }
+
+ 
