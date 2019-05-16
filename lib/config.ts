@@ -10,7 +10,7 @@ import * as fs from "fs";
 import * as t from "io-ts";
 
 import * as path from "path";
-// import * as readlineSync from "readline-sync";
+import * as readlineSync from "readline-sync";
 import * as winston from "winston";
 
 import { traverse } from "fp-ts/lib/Array";
@@ -138,14 +138,14 @@ Validation<ResourcesConfiguration> => {
         r.reduce((acc, curr) => ({ ...acc, ...curr }), {})
     );
 
-  // if (
-  //   !process.env.NPMDEPLOY &&
-  //   !readlineSync.keyInYNStrict(
-  //     `Do you want to proceed with this configuration (${environment}) ?`
-  //   )
-  // ) {
-  //   throw new Error("Aborted.");
-  // }
+  if (
+    !process.env.NPMDEPLOY &&
+    !readlineSync.keyInYNStrict(
+      `Do you want to proceed with this configuration (${environment}) ?`
+    )
+  ) {
+    throw new Error("Aborted.");
+  }
 
   return ResourcesConfiguration.decode(config);
 };
