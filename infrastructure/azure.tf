@@ -846,6 +846,8 @@ resource "null_resource" "azurerm_notification_hub" {
 # API management
 
 ## Create and configure the API management service
+
+
 resource "azurerm_api_management" "azurerm_apim" {
   count               = "${var.environment == "production" ? 1 : 0}"
 
