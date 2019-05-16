@@ -21,7 +21,7 @@
 # }
 
 module "azurerm_api_management" {
-  source              = "../terraform-azurerm-resource"
+  source              = "innovationnorway/resource/azurerm"
   api_version         = "2019-01-01"
   type                = "Microsoft.ApiManagement/service"
   name                = "${local.azurerm_apim_name}"
