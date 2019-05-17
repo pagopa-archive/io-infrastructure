@@ -11,3 +11,4 @@ output "outputs" {
 # output "gateway_url" {
 #   value = "${azurerm_api_management.azurerm_apim.*.gateway_url}"
 # }
+
