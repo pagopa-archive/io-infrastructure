@@ -117,3 +117,8 @@ variable "apim_provisioner" {
  }
 
  
+  variable "apim_adb2c_provisioner" { }
+
+variable "apim_logger_provisioner" { }
+
+ 
