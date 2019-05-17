@@ -102,7 +102,6 @@ data "azurerm_key_vault_secret" "dev_portal_client_secret" {
 
 
 
-
 ## Connect API management developer portal authentication to Active Directory B2C
 
 resource "null_resource" "azurerm_apim_adb2c" {
@@ -137,6 +136,7 @@ resource "null_resource" "azurerm_apim_adb2c" {
     }
   }
 }
+
 ## Connect the API management resource with the EventHub logger
 
 resource "null_resource" "azurerm_apim_logger" {
