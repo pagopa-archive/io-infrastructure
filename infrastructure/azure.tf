@@ -847,53 +847,30 @@ resource "null_resource" "azurerm_notification_hub" {
 
 ## Create and configure the API management service
 
+module "azurerm_apim_internal" {
+  source      = "./modules/azurerm/apim"
+  environment = "${var.environment_short}"
 
-resource "azurerm_api_management" "azurerm_apim" {
-  count               = "${var.environment == "production" ? 1 : 0}"
+  # name                = "${local.azurerm_apim_name}"
+  resource_name_prefix = "${var.azurerm_resource_name_prefix}"
+  location             = "${azurerm_resource_group.azurerm_resource_group.location}"
+  resource_group_name  = "${azurerm_resource_group.azurerm_resource_group.name}"
+  virtualNetworkType   = "external"
 
-  name                = "${local.azurerm_apim_name}"
-  location            = "${azurerm_resource_group.azurerm_resource_group.location}"
-  resource_group_name = "${azurerm_resource_group.azurerm_resource_group.name}"
-  publisher_name      = "Digital Citizenship"
-  publisher_email     = "apim@agid.gov.it"
+  # virtualNetworkConfiguration = 
+  # service_principal_client_id     = "${data.azurerm_client_config.current.client_id}"
+  # service_principal_client_secret = "${var.ARM_CLIENT_SECRET}"
+  provisioner_version = "3"
+
+  publisher_name            = "Digital Citizenship"
+  publisher_email           = "apim@agid.gov.it"
   notification_sender_email = "apim@agid.gov.it"
+  azurerm_function_app_name = "${azurerm_function_app.azurerm_function_app.name}"
+  key_vault_id              = "${var.key_vault_id}"
+  sku_name                  = "Premium"
+  ADB2C_TENANT_ID           = "${var.ADB2C_TENANT_ID}"
 
-  sku {
-    name     = "${var.azurerm_apim_sku}"
-    capacity = 1
-  }
-
-  hostname_configuration {
-  }
-}
-
-resource "null_resource" "azurerm_apim" {
-  count               = "${var.environment == "production" ? 1 : 0}"
-
-  triggers = {
-    azurerm_function_app_id     = "${azurerm_function_app.azurerm_function_app.id}"
-    azurerm_resource_group_name = "${azurerm_resource_group.azurerm_resource_group.name}"
-    provisioner_version         = "2"
-  }
-
-  provisioner "local-exec" {
-    command = "${join(" ", list(
-      "ts-node ${var.apim_provisioner}",
-      "--environment ${var.environment}",
-      "--azurerm_resource_group ${azurerm_resource_group.azurerm_resource_group.name}",
-      "--azurerm_apim ${azurerm_api_management.azurerm_apim.name}",
-      "--azurerm_apim_scm_url ${azurerm_api_management.azurerm_apim.scm_url}",
-      "--azurerm_functionapp ${azurerm_function_app.azurerm_function_app.name}",
-      "--apim_configuration_path ${var.apim_configuration_path}"))
-    }"
-
-    environment = {
-      ENVIRONMENT = "${var.environment}"
-      TF_VAR_ADB2C_TENANT_ID = "${var.ADB2C_TENANT_ID}"
-      TF_VAR_DEV_PORTAL_CLIENT_ID = "${data.azurerm_key_vault_secret.dev_portal_client_id.value}"
-      TF_VAR_DEV_PORTAL_CLIENT_SECRET = "${data.azurerm_key_vault_secret.dev_portal_client_secret.value}"
-    }
-  }
+  # sku_capacity = 1
 }
 
 ## Connect API management developer portal authentication to Active Directory B2C
@@ -904,11 +881,11 @@ resource "null_resource" "azurerm_apim_adb2c" {
   triggers = {
     azurerm_function_app_id     = "${azurerm_function_app.azurerm_function_app.id}"
     azurerm_resource_group_name = "${azurerm_resource_group.azurerm_resource_group.name}"
-    azurerm_apim_id             = "${azurerm_api_management.azurerm_apim.id}"
+    azurerm_apim_id             = "${module.azurerm_apim_internal.id}"
     provisioner_version         = "1"
   }
 
-  depends_on = ["azurerm_api_management.azurerm_apim"]
+  depends_on = ["module.azurerm_apim_internal"]
 
   provisioner "local-exec" {
     command = "${join(" ", list(
@@ -941,11 +918,11 @@ resource "null_resource" "azurerm_apim_logger" {
     azurerm_resource_group_name        = "${azurerm_resource_group.azurerm_resource_group.name}"
     azurerm_apim_eventhub_id           = "${azurerm_eventhub.azurerm_apim_eventhub.id}"
     azurerm_eventhub_connection_string = "${azurerm_eventhub_authorization_rule.azurerm_apim_eventhub_rule.primary_connection_string}"
-    azurerm_apim_id                    = "${azurerm_api_management.azurerm_apim.id}"
+    azurerm_apim_id                    = "${module.azurerm_apim_internal.id}"
     provisioner_version                = "1"
   }
 
-  depends_on = ["azurerm_api_management.azurerm_apim"]
+  depends_on = ["module.azurerm_apim_internal"]
 
   provisioner "local-exec" {
     command = "${join(" ", list(
@@ -975,7 +952,7 @@ resource "null_resource" "azurerm_apim_api" {
   triggers = {
     azurerm_function_app_id     = "${azurerm_function_app.azurerm_function_app.id}"
     azurerm_resource_group_name = "${azurerm_resource_group.azurerm_resource_group.name}"
-    azurerm_apim_id             = "${azurerm_api_management.azurerm_apim.id}"
+    azurerm_apim_id             = "${module.azurerm_apim_internal.id}"
     provisioner_version         = "1"
   }
 
