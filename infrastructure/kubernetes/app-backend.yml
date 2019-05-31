@@ -28,7 +28,7 @@ spec:
         app: app-backend
     spec:
       containers:
-      - image: "teamdigitale/italia-backend:v1.2.3"
+      - image: "teamdigitale/italia-backend:v1.3.1"
         name: app-backend
         ports:
         - name: http-port
@@ -91,6 +91,8 @@ spec:
           value: "2592000"
         - name: "IDP_METADATA_URL"
           value: "https://registry.spid.gov.it/metadata/idp/spid-entities-idps.xml"
+        - name: "IDP_METADATA_REFRESH_INTERVAL_SECONDS"
+          value: "864000" # 10 days
         volumeMounts:
           - name: certs
             mountPath: "/usr/src/app/certs"
