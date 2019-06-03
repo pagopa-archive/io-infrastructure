@@ -1245,7 +1245,7 @@ resource "azurerm_virtual_network_peering" "redis_to_aks_cluster" {
 # Peering from the new AKS agent VNet to the Redis Cache VNet
 resource "azurerm_virtual_network_peering" "aks_cluster_to_redis" {
   name                         = "AksToRedis"
-  resource_group_name          = "${module.kubernetes.aks_rg_name}"
+  resource_group_name          = "${azurerm_resource_group.azurerm_resource_group.name}"
   virtual_network_name         = "${azurerm_virtual_network.azurerm_aks_cluster_vnet.name}"
   remote_virtual_network_id    = "${azurerm_virtual_network.azurerm_redis_cache.id}"
   allow_virtual_network_access = "true"
