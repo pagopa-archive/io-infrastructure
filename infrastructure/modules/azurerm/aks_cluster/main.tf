@@ -16,6 +16,10 @@
 
 # Existing infrastructure
 
+
+data "azurerm_resource_group" "rg_keyvault" {
+  name = "${var.azurerm_key_vault_rg}"
+}
 data "azurerm_resource_group" "rg" {
   name = "${local.azurerm_resource_group_name}"
 }
@@ -36,8 +40,8 @@ data "azuread_application" "application" {
 }
 
 data "azurerm_key_vault" "key_vault" {
-  name                = "${local.azurerm_key_vault_name}"
-  resource_group_name = "${data.azurerm_resource_group.rg.name}"
+  name                = "${var.azurerm_key_vault_name}"
+  resource_group_name = "${data.azurerm_resource_group.rg_keyvault.rg.name}"
 }
 
 data "azurerm_key_vault_secret" "aks_client_secret" {

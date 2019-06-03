@@ -12,6 +12,15 @@ variable "location" {
   description = "The data center location where all resources will be put into."
 }
 
+# Keyvault related variables
+variable "azurerm_key_vault_rg" {
+  description = "The name of the key vault resource group."
+}
+
+variable "azurerm_key_vault_name" {
+  description = "The Azure key ault name."
+}
+
 # Service Principal related variables
 
 variable "azurerm_key_vault_secret_name" {
