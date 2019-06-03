@@ -37,3 +37,9 @@ output "azurerm_kubernetes_cluster_network_profile_docker_bridge_cidr" {
   description = "IP address (in CIDR notation) used as the Docker bridge IP address on nodes."
   value       = "${var.azurerm_kubernetes_cluster_network_profile_docker_bridge_cidr}"
 }
+
+# Fixme: cluster id is not returned as attribute as docs mention. Contact maintainers and fix
+output "agents_network_security_group_name" {
+  description = "The Azure AKS cluster id."
+  value       = "aks-agentpool-22996036-nsg" 
+}

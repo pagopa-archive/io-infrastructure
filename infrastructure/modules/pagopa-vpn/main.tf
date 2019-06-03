@@ -39,7 +39,7 @@ locals {
   loadbalancer_playbook_url = "https://raw.githubusercontent.com/teamdigitale/${local.loadbalancer_playbook_repo_name}"
 
   # loadbalancer playbook archive version
-  loadbalancer_playbook_version = "0.0.15"
+  loadbalancer_playbook_version = "0.0.16"
 
   # Precompute resource names based on naming convention
   virtual_network_name                    = "${var.azurerm_resource_name_prefix}-ppa-vpn-vnet-${var.environment_short}"
@@ -294,7 +294,7 @@ SETTINGS
 }
 
 #
-# Peerings between the VPN virtual network and the old AKS virtual network - start
+# Peerings between the VPN virtual network and the AKS virtual network
 #
 
 # Peering from the pagoPA VPN VNet to the AKS agent VNet
@@ -317,52 +317,12 @@ resource "azurerm_virtual_network_peering" "pagopa_to_aks" {
   }
 }
 
-# Peering from the old AKS agent VNet to the pagoPA VPN VNet
+# Peering from the AKS agent VNet to the pagoPA VPN VNet
 resource "azurerm_virtual_network_peering" "aks_to_pagopa" {
   # only create when enable == "true"
   count = "${var.enable == "true" ? 1 : 0}"
 
   name                         = "AksToPagoPa"
-  resource_group_name          = "${var.aks_rg_name}"
-  virtual_network_name         = "${var.aks_vnet_name}"
-  remote_virtual_network_id    = "${azurerm_virtual_network.default.id}"
-  allow_virtual_network_access = "true"
-}
-
-#
-# Peerings between the VPN virtual network and the old AKS virtual network - end
-#
-
-#
-# Peerings between the VPN virtual network and the new AKS virtual network - start
-#
-
-# Peering from the pagoPA VPN VNet to the AKS agent VNet
-resource "azurerm_virtual_network_peering" "pagopa_to_aks_cluster" {
-  # only create when enable == "true"
-  count = "${var.enable == "true" ? 1 : 0}"
-
-  name                         = "PagoPaToAksCluster"
-  resource_group_name          = "${var.resource_group_name}"
-  virtual_network_name         = "${azurerm_virtual_network.default.name}"
-  remote_virtual_network_id    = "${var.aks_vnet_id}"
-  allow_virtual_network_access = "true"
-
-  # NOTE: due to an issue with the Azure provider, once the two mutual
-  # peerings gets created, on the next run it will attempt to recreate this
-  # one due to the changed (computed) value of remote_virtual_network_id
-  # We can safely ignore changes to remote_virtual_network_id.
-  lifecycle {
-    ignore_changes = ["remote_virtual_network_id"]
-  }
-}
-
-# Peering from the AKS agent VNet to the pagoPA VPN VNet
-resource "azurerm_virtual_network_peering" "aks_cluster_to_pagopa" {
-  # only create when enable == "true"
-  count = "${var.enable == "true" ? 1 : 0}"
-
-  name                         = "AksClusterToPagoPa"
   resource_group_name          = "${var.resource_group_name}"
   virtual_network_name         = "${var.aks_vnet_name}"
   remote_virtual_network_id    = "${azurerm_virtual_network.default.id}"
@@ -370,11 +330,7 @@ resource "azurerm_virtual_network_peering" "aks_cluster_to_pagopa" {
 }
 
 #
-# Peerings between the VPN virtual network and the new AKS virtual network - end
-#
-
-#
-# Network security rules for old AKS agent nodes - start
+# Network security rules for AKS agent nodes
 #
 
 # Allow inbound TCP from the VPN-pagoPA loadbalancer to pods:{aks_nodeport}
@@ -452,10 +408,6 @@ resource "azurerm_network_security_rule" "inbound_aks" {
   resource_group_name         = "${var.resource_group_name}"
   network_security_group_name = "${azurerm_network_security_group.lb_nsg.name}"
 }
-
-#
-# Network security rules for old AKS agent nodes - end
-#
 
 # TODO: add deny rules for free traffic between VNets
 

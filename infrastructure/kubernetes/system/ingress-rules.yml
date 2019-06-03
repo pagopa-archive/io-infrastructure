@@ -1,0 +1,51 @@
+---
+#
+# Ingress routing rules, apps will be routed based on host names where
+# services will be routed based on paths.
+#
+# TODO:
+# - add whitelist-source-range annotation
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: ingress-nginx
+  # see https://github.com/kubernetes/ingress-nginx/blob/master/docs/user-guide/annotations.md
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    # TODO: we want ssl-redirect to be true but see https://github.com/jetstack/cert-manager/issues/194
+    ingress.kubernetes.io/ssl-redirect: "false"
+    kubernetes.io/tls-acme: "true"
+    certmanager.k8s.io/cluster-issuer: "letsencrypt-prod"
+spec:
+  tls:
+    - hosts:
+      - app-backend.k8s.test.cd.teamdigitale.it
+      secretName: app-backend-cert-lep
+    - hosts:
+      - app-backend-rc.k8s.test.cd.teamdigitale.it
+      secretName: app-backend-rc-cert-lep
+    - hosts:
+      - spid-testenv2.k8s.test.io.italia.it
+      secretName: spid-testenv2-cert-lep
+  rules:
+  - host: app-backend.k8s.test.cd.teamdigitale.it
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: app-backend
+          servicePort: 80
+  - host: app-backend-rc.k8s.test.cd.teamdigitale.it
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: app-backend-rc
+          servicePort: 80
+  - host: spid-testenv2.k8s.test.io.italia.it
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: spid-testenv2
+          servicePort: 8088

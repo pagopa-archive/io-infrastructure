@@ -1,0 +1,10 @@
+controller:
+  metrics:
+    enabled: "true"
+  stats:
+    enabled: "true"
+  service:
+    externalTrafficPolicy: "Local"
+    loadBalancerIP: 51.144.174.220
+rbac:
+  create: "true"
