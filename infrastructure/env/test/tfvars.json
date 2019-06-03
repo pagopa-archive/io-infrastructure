@@ -12,6 +12,7 @@
   "azurerm_kubernetes_admin_ssh_publickey_file": "k8s_admin_key.pub",
   "azurerm_kubernetes_agent_vm_size": "Standard_D2",
   "azurerm_key_vault_rg": "terraform-resource-group",
+  "azurerm_kubernetes_cluster_service_principal_client_id": "13011741-6421-4758-8abf-94383bd86769",
   "azurerm_key_vault_name": "io-key-vault",
   "aks_cluster_name": "k8s-01",
   "aks_cluster_ip_name": "k8s-01",

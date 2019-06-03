@@ -224,6 +224,11 @@ variable "azurerm_key_vault_name" {
   description = "The name of the key vault containing the aks cluster service principal secret."
 }
 
+variable "azurerm_kubernetes_cluster_service_principal_client_id" {
+  type        = "string"
+  description = "The application is of the kubernetes service principal."
+}
+
 variable "azurerm_aks_cluster_vnet_name" {
   type        = "string"
   description = "The name suffix of the VNET used by AKS cluster nodes and external service IPs."
@@ -406,6 +411,7 @@ locals {
   azurerm_notification_hub_ns               = "${var.azurerm_resource_name_prefix}-notificationhubns-${var.environment_short}"
   azurerm_kubernetes_name                   = "${var.azurerm_resource_name_prefix}-k8s-${var.environment_short}"
   azurerm_kubernetes_public_ip_name         = "${var.azurerm_resource_name_prefix}-k8s-ip-${var.environment_short}"
+  azurerm_kubernetes_key_vault_secret_name  = "${var.azurerm_resource_name_prefix}sp${replace(var.aks_cluster_name, "-", "")}${var.environment}"
   azurerm_aks_cluster_vnet_name             = "${var.azurerm_resource_name_prefix}-aks-cluster-vnet-${var.environment_short}"
   azurerm_aks_cluster_subnet_name           = "${var.azurerm_resource_name_prefix}-aks-cluster-subnet-${var.environment_short}"
   azurerm_aks_cluster_name                  = "${var.azurerm_resource_name_prefix}-k8s-${var.environment_short}-${var.aks_cluster_name}"
@@ -1291,18 +1297,6 @@ resource "azurerm_subnet" "azurerm_aks_cluster_subnet" {
   address_prefix       = "${var.azurerm_subnet_aks_cluster_address_prefix}"
 }
 
-module "aks_cluster_service_principal" {
-  source = "./modules/azurerm/service_principal"
-
-  resource_name_prefix                         = "${var.azurerm_resource_name_prefix}"
-  environment                                  = "${var.environment}"
-  azurerm_key_vault_rg                         = "${var.azurerm_key_vault_rg}"
-  azurerm_key_vault_name                       = "${var.azurerm_key_vault_name}"
-  app_name                                     = "${local.azurerm_aks_cluster_name}"
-  azurerm_role_assignment_role_definition_name = "Contributor"
-  azurerm_key_vault_secret_name                = "${replace(local.azurerm_aks_cluster_name, "-", "")}"
-}
-
 module "aks_cluster" {
   source = "./modules/azurerm/aks_cluster"
 
@@ -1310,9 +1304,10 @@ module "aks_cluster" {
   environment                                                   = "${var.environment}"
   location                                                      = "${var.location}"
   log_analytics_workspace_name                                  = "${azurerm_log_analytics_workspace.azurerm_log_analytics.name}"
-  aks_cluster_name                                              = "${local.azurerm_aks_cluster_name}"
+  aks_cluster_name                                              = "${var.aks_cluster_name}"
   azurerm_key_vault_rg                                          = "${var.azurerm_key_vault_rg}"
   azurerm_key_vault_name                                        = "${var.azurerm_key_vault_name}"
+  azurerm_kubernetes_cluster_service_principal_client_id        = "${var.azurerm_kubernetes_cluster_service_principal_client_id}"
   azurerm_kubernetes_cluster_linux_profile_admin_username       = "${var.azurerm_kubernetes_admin_username}"
   ssh_public_key_path                                           = "${path.module}/files/${var.azurerm_aks_cluster_admin_ssh_publickey_file}"
   azurerm_kubernetes_cluster_agent_pool_profile_count           = "${var.azurerm_aks_cluster_agent_count}"
@@ -1323,7 +1318,7 @@ module "aks_cluster" {
   azurerm_kubernetes_cluster_network_profile_dns_service_ip     = "${var.azurerm_kubernetes_cluster_network_profile_dns_service_ip}"
   azurerm_kubernetes_cluster_network_profile_docker_bridge_cidr = "${var.azurerm_kubernetes_cluster_network_profile_docker_bridge_cidr}"
   azurerm_kubernetes_cluster_kubernetes_version                 = "${var.azurerm_kubernetes_cluster_kubernetes_version}"
-  azurerm_key_vault_secret_name                                 = "${replace(local.azurerm_aks_cluster_name, "-", "")}"
+  azurerm_key_vault_secret_name                                 = "${local.azurerm_kubernetes_key_vault_secret_name}"
   vnet_name                                                     = "${azurerm_virtual_network.azurerm_aks_cluster_vnet.name}"
   subnet_name                                                   = "${azurerm_subnet.azurerm_aks_cluster_subnet.name}"
 }
@@ -1366,7 +1361,7 @@ output "azurerm_kubernetes_public_ip_ip" {
 resource "azurerm_public_ip" "azurerm_aks_cluster_public_ip" {
   name                = "${local.azurerm_aks_cluster_public_ip_name}"
   location            = "${data.azurerm_resource_group.k8s_rg.location}"
-  resource_group_name = "${data.azurerm_resource_group.k8s_rg.name}"
+  resource_group_name = "${azurerm_resource_group.azurerm_resource_group.name}"
   allocation_method   = "Static"
 
   tags {

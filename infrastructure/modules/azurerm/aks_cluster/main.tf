@@ -25,23 +25,19 @@ data "azurerm_resource_group" "rg" {
 }
 
 data "azurerm_virtual_network" "aks_vnet" {
-  name                = "${local.azurerm_virtual_network_name}"
+  name                = "${var.vnet_name}"
   resource_group_name = "${data.azurerm_resource_group.rg.name}"
 }
 
 data "azurerm_subnet" "aks_subnet" {
-  name                 = "${local.azurerm_subnet_name}"
+  name                 = "${var.subnet_name}"
   virtual_network_name = "${data.azurerm_virtual_network.aks_vnet.name}"
   resource_group_name  = "${data.azurerm_resource_group.rg.name}"
 }
 
-data "azuread_application" "application" {
-  name = "${local.azurerm_azuread_service_principal_display_name}"
-}
-
 data "azurerm_key_vault" "key_vault" {
   name                = "${var.azurerm_key_vault_name}"
-  resource_group_name = "${data.azurerm_resource_group.rg_keyvault.rg.name}"
+  resource_group_name = "${data.azurerm_resource_group.rg_keyvault.name}"
 }
 
 data "azurerm_key_vault_secret" "aks_client_secret" {
@@ -73,7 +69,7 @@ resource "azurerm_kubernetes_cluster" "azurerm_kubernetes_cluster" {
   name                = "${local.azurerm_kubernetes_cluster_name}"
   location            = "${data.azurerm_resource_group.rg.location}"
   resource_group_name = "${data.azurerm_resource_group.rg.name}"
-  dns_prefix          = "${var.aks_cluster_name}"
+  dns_prefix          = "${local.azurerm_kubernetes_cluster_name}"
   kubernetes_version  = "${var.azurerm_kubernetes_cluster_kubernetes_version}"
 
   linux_profile {
@@ -94,7 +90,7 @@ resource "azurerm_kubernetes_cluster" "azurerm_kubernetes_cluster" {
   }
 
   service_principal {
-    client_id     = "${data.azuread_application.application.application_id}"
+    client_id     = "${var.azurerm_kubernetes_cluster_service_principal_client_id}"
     client_secret = "${data.azurerm_key_vault_secret.aks_client_secret.value}"
   }
 

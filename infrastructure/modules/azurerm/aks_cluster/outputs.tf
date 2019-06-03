@@ -15,7 +15,7 @@ output "azurerm_kubernetes_cluster_linux_profile_admin_username" {
 
 output "azurerm_virtual_network_name" {
   description = "The Azure VNET used to host the PODs."
-  value       = "${local.azurerm_virtual_network_name}"
+  value       = "${var.vnet_name}"
 }
 
 output "azurerm_kubernetes_cluster_network_profile_pod_cidr" {

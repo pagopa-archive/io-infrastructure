@@ -23,6 +23,10 @@ variable "azurerm_key_vault_name" {
 
 # Service Principal related variables
 
+variable "azurerm_kubernetes_cluster_service_principal_client_id" {
+  description = "The kubernetes service principal application id."
+}
+
 variable "azurerm_key_vault_secret_name" {
   description = "The name of the service principal secret key."
 }
@@ -96,8 +100,6 @@ locals {
   # {azurerm_resource_name_prefix}-RESOURCE_TYPE-{environment}
   azurerm_resource_group_name                        = "${var.resource_name_prefix}-rg-${var.environment}"
   azurerm_azuread_service_principal_display_name     = "${var.resource_name_prefix}-sp-${var.aks_cluster_name}-${var.environment}"
-  azurerm_virtual_network_name                       = "${var.resource_name_prefix}-vnet-${var.vnet_name}-${var.environment}"
-  azurerm_subnet_name                                = "${var.resource_name_prefix}-subnet-${var.subnet_name}-${var.environment}"
   azurerm_kubernetes_cluster_name                    = "${var.resource_name_prefix}-aks-${var.aks_cluster_name}-${var.environment}"
   # Agent pool profile cluster name cannot have dashes
   agent_pool_profile_cluster_name                    = "${replace(var.aks_cluster_name, "-", "")}"
