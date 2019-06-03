@@ -85,14 +85,13 @@ variable "azurerm_kubernetes_cluster_network_profile_docker_bridge_cidr" {
 locals {
   # Define resource names based on the following convention:
   # {azurerm_resource_name_prefix}-RESOURCE_TYPE-{environment}
-  azurerm_resource_group_name                        = "${var.resource_name_prefix}-${var.environment}-rg"
-  azurerm_azuread_service_principal_display_name     = "${var.resource_name_prefix}-${var.environment}-sp-${var.aks_cluster_name}"
-  azurerm_virtual_network_name                       = "${var.resource_name_prefix}-${var.environment}-vnet-${var.vnet_name}"
-  azurerm_subnet_name                                = "${var.resource_name_prefix}-${var.environment}-subnet-${var.subnet_name}"
-  azurerm_log_analytics_workspace_name               = "${var.resource_name_prefix}-${var.environment}-log-analytics-workspace-${var.log_analytics_workspace_name}"
-  azurerm_kubernetes_cluster_name                    = "${var.resource_name_prefix}-${var.environment}-aks-${var.aks_cluster_name}"
+  azurerm_resource_group_name                        = "${var.resource_name_prefix}-rg-${var.environment}"
+  azurerm_azuread_service_principal_display_name     = "${var.resource_name_prefix}-sp-${var.aks_cluster_name}-${var.environment}"
+  azurerm_virtual_network_name                       = "${var.resource_name_prefix}-vnet-${var.vnet_name}-${var.environment}"
+  azurerm_subnet_name                                = "${var.resource_name_prefix}-subnet-${var.subnet_name}-${var.environment}"
+  azurerm_kubernetes_cluster_name                    = "${var.resource_name_prefix}-aks-${var.aks_cluster_name}-${var.environment}"
   # Agent pool profile cluster name cannot have dashes
   agent_pool_profile_cluster_name                    = "${replace(var.aks_cluster_name, "-", "")}"
-  azurerm_kubernetes_cluster_agent_pool_profile_name = "${var.resource_name_prefix}${var.environment}k8s"
+  azurerm_kubernetes_cluster_agent_pool_profile_name = "${var.resource_name_prefix}k8s${var.environment}"
   azurerm_key_vault_name                             = "${var.resource_name_prefix}-${var.environment}-keyvault"
 }

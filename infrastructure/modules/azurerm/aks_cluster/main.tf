@@ -46,7 +46,7 @@ data "azurerm_key_vault_secret" "aks_client_secret" {
 }
 
 data "azurerm_log_analytics_workspace" "log_analytics_workspace" {
-  name                = "${local.azurerm_log_analytics_workspace_name}"
+  name                = "${var.log_analytics_workspace_name}"
   resource_group_name = "${data.azurerm_resource_group.rg.name}"
 }
 
