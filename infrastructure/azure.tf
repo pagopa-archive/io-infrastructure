@@ -214,6 +214,16 @@ variable "azurerm_kubernetes_agent_count" {
 
 # New Kubernetes (AKS) module / cluster - start
 
+variable "azurerm_key_vault_rg" {
+  type        = "string"
+  description = "The resource group name of the key vault used for the aks cluster service principal."
+}
+
+variable "azurerm_key_vault_name" {
+  type        = "string"
+  description = "The name of the key vault containing the aks cluster service principal secret."
+}
+
 variable "azurerm_aks_cluster_vnet_name" {
   type        = "string"
   description = "The name suffix of the VNET used by AKS cluster nodes and external service IPs."
@@ -232,6 +242,11 @@ variable "azurerm_virtual_network_aks_cluster_address_space" {
 variable "azurerm_subnet_aks_cluster_address_prefix" {
   type        = "string"
   description = "The address prefix of the AKS cluster subnet where nodes live."
+}
+
+variable "azurerm_kubernetes_cluster_kubernetes_version" {
+  type        = "string"
+  description = "The version of Kubernetes to deploy."
 }
 
 variable "azurerm_kubernetes_cluster_network_profile_pod_cidr" {
@@ -258,6 +273,10 @@ variable "aks_cluster_name" {
 variable "aks_cluster_ip_name" {
   type        = "string"
   description = "The name suffix of the public IP used for AKS cluster."
+}
+
+variable "azurerm_aks_cluster_agent_count" {
+  description = "The number of kubernetes nodes."
 }
 
 # See VM sizes https://docs.microsoft.com/en-us/azure/virtual-machines/linux/sizes
@@ -1275,8 +1294,10 @@ resource "azurerm_subnet" "azurerm_aks_cluster_subnet" {
 module "aks_cluster_service_principal" {
   source = "./modules/azurerm/service_principal"
 
-  resource_name_prefix                         = "${local.azurerm_resource_name_prefix}"
+  resource_name_prefix                         = "${var.azurerm_resource_name_prefix}"
   environment                                  = "${var.environment}"
+  azurerm_key_vault_rg                         = "${var.azurerm_key_vault_rg}"
+  azurerm_key_vault_name                       = "${var.azurerm_key_vault_name}"
   app_name                                     = "${local.azurerm_aks_cluster_name}"
   azurerm_role_assignment_role_definition_name = "Contributor"
   azurerm_key_vault_secret_name                = "${replace(local.azurerm_aks_cluster_name, "-", "")}"
@@ -1285,8 +1306,9 @@ module "aks_cluster_service_principal" {
 module "aks_cluster" {
   source = "./modules/azurerm/aks_cluster"
 
-  resource_name_prefix                                          = "${local.azurerm_resource_name_prefix}"
+  resource_name_prefix                                          = "${var.azurerm_resource_name_prefix}"
   environment                                                   = "${var.environment}"
+  location                                                      = "${var.location}"
   log_analytics_workspace_name                                  = "{azurerm_log_analytics_workspace.azurerm_log_analytics.name}"
   aks_cluster_name                                              = "${local.azurerm_aks_cluster_name}"
   azurerm_kubernetes_cluster_linux_profile_admin_username       = "${var.azurerm_kubernetes_admin_username}"
@@ -1298,12 +1320,10 @@ module "aks_cluster" {
   azurerm_kubernetes_cluster_network_profile_service_cidr       = "${var.azurerm_kubernetes_cluster_network_profile_service_cidr}"
   azurerm_kubernetes_cluster_network_profile_dns_service_ip     = "${var.azurerm_kubernetes_cluster_network_profile_dns_service_ip}"
   azurerm_kubernetes_cluster_network_profile_docker_bridge_cidr = "${var.azurerm_kubernetes_cluster_network_profile_docker_bridge_cidr}"
-  azurerm_kubernetes_cluster_kubernetes_version                 = "1.13.5"
+  azurerm_kubernetes_cluster_kubernetes_version                 = "${var.azurerm_kubernetes_cluster_kubernetes_version}"
   azurerm_key_vault_secret_name                                 = "${replace(local.azurerm_aks_cluster_name, "-", "")}"
   vnet_name                                                     = "${azurerm_virtual_network.azurerm_aks_cluster_vnet.name}"
   subnet_name                                                   = "${azurerm_subnet.azurerm_aks_cluster_subnet.name}"
-
-  depends_on = ["module.aks_cluster_service_principal"]
 }
 
 # New Azure Container Service (Kubernetes) - end

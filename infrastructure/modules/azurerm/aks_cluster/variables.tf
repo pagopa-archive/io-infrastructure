@@ -93,6 +93,6 @@ locals {
   azurerm_kubernetes_cluster_name                    = "${var.resource_name_prefix}-${var.environment}-aks-${var.aks_cluster_name}"
   # Agent pool profile cluster name cannot have dashes
   agent_pool_profile_cluster_name                    = "${replace(var.aks_cluster_name, "-", "")}"
-  azurerm_kubernetes_cluster_agent_pool_profile_name = "${var.resource_name_prefix}${var.environment}${local.agent_pool_profile_cluster_name}"
+  azurerm_kubernetes_cluster_agent_pool_profile_name = "${var.resource_name_prefix}${var.environment}k8s"
   azurerm_key_vault_name                             = "${var.resource_name_prefix}-${var.environment}-keyvault"
 }

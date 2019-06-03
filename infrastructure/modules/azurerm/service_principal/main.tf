@@ -3,7 +3,7 @@ data "azurerm_subscription" "current" {}
 # Existing infrastructure
 
 data "azurerm_resource_group" "rg" {
-  name = "${local.azurerm_resource_group_name}"
+  name = "${var.azurerm_key_vault_rg}"
 }
 
 data "azurerm_key_vault" "key_vault" {

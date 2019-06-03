@@ -6,6 +6,10 @@ variable "resource_name_prefix" {
   description = "The prefix used to name all resources created."
 }
 
+variable "azurerm_key_vault_rg" {
+  description = "The name of the key vault resource group."
+}
+
 variable "app_name" {
   description = "The Azure application name"
 }
