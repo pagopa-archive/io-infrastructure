@@ -1298,7 +1298,7 @@ resource "azurerm_subnet" "azurerm_aks_cluster_subnet" {
   address_prefix       = "${var.azurerm_subnet_aks_cluster_address_prefix}"
 
   lifecycle {
-    ignore_changes = ["azurerm_subnet.azurerm_aks_cluster_subnet.route_table_id"]
+    ignore_changes = ["route_table_id"]
   }
 }
 
