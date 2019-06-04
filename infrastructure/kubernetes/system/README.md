@@ -16,6 +16,8 @@ kubectl apply -f tiller-rbac-config.yml
 
 ## Deploy the cert-manager
 
+> **Warning:** If the first command generates a validation error, you should update the *kubectl* client.
+
 ```shell
 # Install the CustomResourceDefinition resources separately
 kubectl apply -f https://raw.githubusercontent.com/jetstack/cert-manager/release-0.8/deploy/manifests/00-crds.yaml
