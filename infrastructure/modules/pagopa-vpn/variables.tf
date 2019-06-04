@@ -10,7 +10,7 @@ variable "environment" {
   description = "Name of the environment"
 }
 
-variable environment_short {
+variable "environment_short" {
   type        = "string"
   description = "Short version of environment name: prod or test (used in resource names)"
 }
@@ -68,4 +68,14 @@ variable "aks_nodes_cidr" {
 variable "lb_ssh_key" {
   type        = "string"
   description = "The SSH key for the admin user of the loadbalancer VM"
+}
+
+variable "mgmt_vnet_id" {
+  type        = "string"
+  description = "The ID of the mgmt VNet"
+}
+
+variable "mgmt_vnet_name" {
+  type        = "string"
+  description = "The name of the mgmt VNet"
 }

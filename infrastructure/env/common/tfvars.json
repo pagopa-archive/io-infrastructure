@@ -25,5 +25,6 @@
     "ml01._domainkey": "ml01.dkim.musvc.com.",
     "ml02._domainkey": "ml02.dkim.musvc.com."
   },
-  "azurerm_redis_cache_private_static_ip_address" : "10.230.0.10"
+  "azurerm_redis_cache_private_static_ip_address" : "10.230.0.10",
+  "storage_account_bd_name": "vmsbd"
 }
