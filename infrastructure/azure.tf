@@ -2,7 +2,7 @@
 # Set up environment variables before running this script (see README.md)
 
 provider "azurerm" {
-  version = "~> 1.24"
+  version = "~> 1.29"
 }
 
 provider "null" {
@@ -193,6 +193,8 @@ variable "default_sender_email" {
   description = "Default sender email address"
 }
 
+# Old Kubernetes module / cluster - start
+
 variable "azurerm_kubernetes_admin_username" {
   type        = "string"
   description = "The username of the admin account on the Kubernetes nodes"
@@ -207,6 +209,93 @@ variable "azurerm_kubernetes_agent_count" {
   type        = "string"
   description = "How many agent nodes in the Kubernetes cluster"
 }
+
+# Old Kubernetes module / cluster - end
+
+# New Kubernetes (AKS) module / cluster - start
+
+variable "azurerm_key_vault_rg" {
+  type        = "string"
+  description = "The resource group name of the key vault used for the aks cluster service principal."
+}
+
+variable "azurerm_key_vault_name" {
+  type        = "string"
+  description = "The name of the key vault containing the aks cluster service principal secret."
+}
+
+variable "azurerm_kubernetes_cluster_service_principal_client_id" {
+  type        = "string"
+  description = "The application is of the kubernetes service principal."
+}
+
+variable "azurerm_aks_cluster_vnet_name" {
+  type        = "string"
+  description = "The name suffix of the VNET used by AKS cluster nodes and external service IPs."
+}
+
+variable "azurerm_aks_cluster_subnet_name" {
+  type        = "string"
+  description = "The name suffix of the subnet used by AKS cluster nodes and external service IPs."
+}
+
+variable "azurerm_virtual_network_aks_cluster_address_space" {
+  type        = "string"
+  description = "The address space of the AKS cluster VNET where nodes live."
+}
+
+variable "azurerm_subnet_aks_cluster_address_prefix" {
+  type        = "string"
+  description = "The address prefix of the AKS cluster subnet where nodes live."
+}
+
+variable "azurerm_kubernetes_cluster_kubernetes_version" {
+  type        = "string"
+  description = "The version of Kubernetes to deploy."
+}
+
+variable "azurerm_kubernetes_cluster_network_profile_pod_cidr" {
+  description = "The CIDR to use for pod IP addresses."
+}
+
+variable "azurerm_kubernetes_cluster_network_profile_service_cidr" {
+  description = "The Network Range used by the Kubernetes service."
+}
+
+variable "azurerm_kubernetes_cluster_network_profile_dns_service_ip" {
+  description = "IP address within the Kubernetes service address range that will be used by cluster service discovery (kube-dns). Must be .10 of the service cidr network specified."
+}
+
+variable "azurerm_kubernetes_cluster_network_profile_docker_bridge_cidr" {
+  description = "IP address (in CIDR notation) used as the Docker bridge IP address on nodes."
+}
+
+variable "aks_cluster_name" {
+  type        = "string"
+  description = "The name suffix of the AKS cluster."
+}
+
+variable "aks_cluster_ip_name" {
+  type        = "string"
+  description = "The name suffix of the public IP used for AKS cluster."
+}
+
+variable "azurerm_aks_cluster_agent_count" {
+  description = "The number of kubernetes nodes."
+}
+
+# See VM sizes https://docs.microsoft.com/en-us/azure/virtual-machines/linux/sizes
+variable "azurerm_aks_cluster_agent_vm_size" {
+  type        = "string"
+  description = "Virtual machine size for agent nodes in Kubernetes cluster"
+}
+
+variable "azurerm_aks_cluster_admin_ssh_publickey_file" {
+  type        = "string"
+  description = "The name of the file under 'files' of the ssh public key for the admin account on the Kubernetes nodes"
+}
+
+# New Kubernetes (AKS) module / cluster - end
 
 # See VM sizes https://docs.microsoft.com/en-us/azure/virtual-machines/linux/sizes
 variable "azurerm_kubernetes_agent_vm_size" {
@@ -322,15 +411,21 @@ locals {
   azurerm_notification_hub_ns               = "${var.azurerm_resource_name_prefix}-notificationhubns-${var.environment_short}"
   azurerm_kubernetes_name                   = "${var.azurerm_resource_name_prefix}-k8s-${var.environment_short}"
   azurerm_kubernetes_public_ip_name         = "${var.azurerm_resource_name_prefix}-k8s-ip-${var.environment_short}"
+  azurerm_kubernetes_key_vault_secret_name  = "${var.azurerm_resource_name_prefix}sp${replace(var.aks_cluster_name, "-", "")}${var.environment}"
+  azurerm_aks_cluster_vnet_name             = "${var.azurerm_resource_name_prefix}-aks-cluster-vnet-${var.environment_short}"
+  azurerm_aks_cluster_subnet_name           = "${var.azurerm_resource_name_prefix}-aks-cluster-subnet-${var.environment_short}"
+  azurerm_aks_cluster_name                  = "${var.azurerm_resource_name_prefix}-aks-${var.aks_cluster_name}-${var.environment_short}"
+  azurerm_aks_cluster_public_ip_name        = "${var.azurerm_resource_name_prefix}-k8s-ip-${var.environment_short}-${var.aks_cluster_ip_name}"
   azurerm_redis_cache_name                  = "${var.azurerm_resource_name_prefix}-redis-${var.environment_short}"
   azurerm_redis_backup_name                 = "${var.azurerm_resource_name_prefix}redisbck${var.environment_short}"
   azurerm_redis_vnet_name                   = "${var.azurerm_resource_name_prefix}-redis-vnet-${var.environment_short}"
 
   # This is hardcoded, since it's generated by Azure when
   # the Kubernetes cluster is created
-  azurerm_resource_group_kubernetes_rg_name = "MC_${local.azurerm_resource_group_name}_${local.azurerm_kubernetes_name}_${var.location}"
+  azurerm_resource_group_kubernetes_rg_name  = "MC_${local.azurerm_resource_group_name}_${local.azurerm_kubernetes_name}_${var.location}"
+  azurerm_resource_group_aks_cluster_rg_name = "MC_${local.azurerm_resource_group_name}_${local.azurerm_aks_cluster_name}_${var.location}"
 
-  default_functions_public_api_url          = "https://${local.azurerm_apim_name}.azure-api.net/"
+  default_functions_public_api_url           = "https://${local.azurerm_apim_name}.azure-api.net/"
 }
 
 #
@@ -745,26 +840,26 @@ resource "null_resource" "azurerm_cosmosdb_ip_range_filter" {
   }
 }
 
-# TODO: assign role to the MSI to let the App Service access API Management users
-# resource "azurerm_virtual_machine_extension" "app_service_portal_msi" {
-#     name                 = "app_service_portal_msi"
-#     location            = "${azurerm_resource_group.azurerm_resource_group.location}"
-#     resource_group_name = "${azurerm_resource_group.azurerm_resource_group.name}"
-#     app_service_plan_id = "${azurerm_app_service_plan.azurerm_app_service_plan_portal.id}"
-#
-#     # virtual_machine_name = "${azurerm_virtual_machine.test.name}"
-#
-#     publisher            = "Microsoft.ManagedIdentity"
-#     type                 = "ManagedIdentityExtensionForWindows"
-#     type_handler_version = "1.0"
-#     settings             = ""
-# }
-# resource "azurerm_role_assignment" "app_service_portal_role" {
-#   name               = "app_service_portal_role"
-#   scope              = "/subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${var.azurerm_resource_group}/providers/Microsoft.Storage/storageAccounts/${var.azurerm_apim}"
-#   role_definition_id = ""
-#   principal_id       = ""
-# }
+TODO: assign role to the MSI to let the App Service access API Management users
+resource "azurerm_virtual_machine_extension" "app_service_portal_msi" {
+    name                 = "app_service_portal_msi"
+    location            = "${azurerm_resource_group.azurerm_resource_group.location}"
+    resource_group_name = "${azurerm_resource_group.azurerm_resource_group.name}"
+    app_service_plan_id = "${azurerm_app_service_plan.azurerm_app_service_plan_portal.id}"
+
+    # virtual_machine_name = "${azurerm_virtual_machine.test.name}"
+
+    publisher            = "Microsoft.ManagedIdentity"
+    type                 = "ManagedIdentityExtensionForWindows"
+    type_handler_version = "1.0"
+    settings             = ""
+}
+resource "azurerm_role_assignment" "app_service_portal_role" {
+  name               = "app_service_portal_role"
+  scope              = "/subscriptions/${data.azurerm_client_config.current.subscription_id}/resourceGroups/${var.azurerm_resource_group}/providers/Microsoft.Storage/storageAccounts/${var.azurerm_apim}"
+  role_definition_id = ""
+  principal_id       = ""
+}
 
 # Logging (OSM)
 
@@ -1105,7 +1200,7 @@ data "azurerm_subnet" "azurerm_redis_cache" {
   resource_group_name  = "${azurerm_resource_group.azurerm_resource_group.name}"
 }
 
-# Peering from the Redis Cache VNet to the AKS agent VNet
+# Peering from the Redis Cache VNet to the old AKS agent VNet
 resource "azurerm_virtual_network_peering" "redis_to_aks" {
   name                         = "RedisToAks"
   resource_group_name          = "${azurerm_resource_group.azurerm_resource_group.name}"
@@ -1122,7 +1217,7 @@ resource "azurerm_virtual_network_peering" "redis_to_aks" {
   }
 }
 
-# Peering from the AKS agent VNet to the Redis Cache VNet
+# Peering from the old AKS agent VNet to the Redis Cache VNet
 resource "azurerm_virtual_network_peering" "aks_to_redis" {
   name                         = "AksToRedis"
   resource_group_name          = "${module.kubernetes.aks_rg_name}"
@@ -1131,9 +1226,34 @@ resource "azurerm_virtual_network_peering" "aks_to_redis" {
   allow_virtual_network_access = "true"
 }
 
-#
-# Azure Container Service (Kubernetes)
-#
+# Peering from the Redis Cache VNet to the new AKS agent VNet
+resource "azurerm_virtual_network_peering" "redis_to_aks_cluster" {
+  name                         = "RedisToAksCluster"
+  resource_group_name          = "${azurerm_resource_group.azurerm_resource_group.name}"
+  virtual_network_name         = "${azurerm_virtual_network.azurerm_redis_cache.name}"
+  remote_virtual_network_id    = "${azurerm_virtual_network.azurerm_aks_cluster_vnet.id}"
+  allow_virtual_network_access = "true"
+
+  # NOTE: due to an issue with the Azure provider, once the two mutual
+  # peerings gets created, on the next run it will attempt to recreate this
+  # one due to the changed (computed) value of remote_virtual_network_id
+  # We can safely ignore changes to remote_virtual_network_id.
+  lifecycle {
+    ignore_changes = ["remote_virtual_network_id"]
+  }
+}
+
+# Peering from the new AKS agent VNet to the Redis Cache VNet
+resource "azurerm_virtual_network_peering" "aks_cluster_to_redis" {
+  name                         = "AksToRedis"
+  resource_group_name          = "${azurerm_resource_group.azurerm_resource_group.name}"
+  virtual_network_name         = "${azurerm_virtual_network.azurerm_aks_cluster_vnet.name}"
+  remote_virtual_network_id    = "${azurerm_virtual_network.azurerm_redis_cache.id}"
+  allow_virtual_network_access = "true"
+}
+
+# Old Azure Container Service (Kubernetes) - start
+
 locals {
   # The ssh public key for the admin account on the k8s nodes is read from the
   # file stored in the "files" directory and named after the value of the
@@ -1156,8 +1276,62 @@ module "kubernetes" {
   service_principal_client_secret = "${var.ARM_CLIENT_SECRET}"
 }
 
+# Old Azure Container Service (Kubernetes) - end
+
+# New Azure Container Service (Kubernetes) - start
+
+resource "azurerm_virtual_network" "azurerm_aks_cluster_vnet" {
+  name                = "${local.azurerm_aks_cluster_vnet_name}"
+  location            = "${azurerm_resource_group.azurerm_resource_group.location}"
+  resource_group_name = "${azurerm_resource_group.azurerm_resource_group.name}"
+  address_space       = ["${var.azurerm_virtual_network_aks_cluster_address_space}"]
+
+  tags {
+    environment = "${var.environment}"
+  }
+}
+
+resource "azurerm_subnet" "azurerm_aks_cluster_subnet" {
+  name                 = "${local.azurerm_aks_cluster_subnet_name}"
+  virtual_network_name = "${azurerm_virtual_network.azurerm_aks_cluster_vnet.name}"
+  resource_group_name  = "${azurerm_resource_group.azurerm_resource_group.name}"
+  address_prefix       = "${var.azurerm_subnet_aks_cluster_address_prefix}"
+
+  lifecycle {
+    ignore_changes = ["route_table_id"]
+  }
+}
+
+module "aks_cluster" {
+  source = "./modules/azurerm/aks_cluster"
+
+  resource_name_prefix                                          = "${var.azurerm_resource_name_prefix}"
+  environment                                                   = "${var.environment}"
+  location                                                      = "${var.location}"
+  log_analytics_workspace_name                                  = "${azurerm_log_analytics_workspace.azurerm_log_analytics.name}"
+  aks_cluster_name                                              = "${var.aks_cluster_name}"
+  azurerm_key_vault_rg                                          = "${var.azurerm_key_vault_rg}"
+  azurerm_key_vault_name                                        = "${var.azurerm_key_vault_name}"
+  azurerm_kubernetes_cluster_service_principal_client_id        = "${var.azurerm_kubernetes_cluster_service_principal_client_id}"
+  azurerm_kubernetes_cluster_linux_profile_admin_username       = "${var.azurerm_kubernetes_admin_username}"
+  ssh_public_key_path                                           = "${path.module}/files/${var.azurerm_aks_cluster_admin_ssh_publickey_file}"
+  azurerm_kubernetes_cluster_agent_pool_profile_count           = "${var.azurerm_aks_cluster_agent_count}"
+  azurerm_kubernetes_cluster_agent_pool_profile_vm_size         = "${var.azurerm_aks_cluster_agent_vm_size}"
+  azurerm_kubernetes_cluster_agent_pool_profile_max_pods        = 100
+  azurerm_kubernetes_cluster_network_profile_pod_cidr           = "${var.azurerm_kubernetes_cluster_network_profile_pod_cidr}"
+  azurerm_kubernetes_cluster_network_profile_service_cidr       = "${var.azurerm_kubernetes_cluster_network_profile_service_cidr}"
+  azurerm_kubernetes_cluster_network_profile_dns_service_ip     = "${var.azurerm_kubernetes_cluster_network_profile_dns_service_ip}"
+  azurerm_kubernetes_cluster_network_profile_docker_bridge_cidr = "${var.azurerm_kubernetes_cluster_network_profile_docker_bridge_cidr}"
+  azurerm_kubernetes_cluster_kubernetes_version                 = "${var.azurerm_kubernetes_cluster_kubernetes_version}"
+  azurerm_key_vault_secret_name                                 = "${local.azurerm_kubernetes_key_vault_secret_name}"
+  vnet_name                                                     = "${azurerm_virtual_network.azurerm_aks_cluster_vnet.name}"
+  subnet_name                                                   = "${azurerm_subnet.azurerm_aks_cluster_subnet.name}"
+}
+
+# New Azure Container Service (Kubernetes) - end
+
 #
-# Allocates a public IP for exposing the Kubernetes services
+# Allocates a public IP for exposing the old Kubernetes services
 #
 # This IP needs to be registered on the following CNAMEs:
 #
@@ -1181,6 +1355,30 @@ output "azurerm_kubernetes_public_ip_ip" {
 }
 
 #
+# Allocates a public IP for exposing the new Kubernetes services
+#
+# This IP needs to be registered on the following CNAMEs:
+#
+# *.k8s.test.cd.teamdigitale.it (for the test environment)
+# *.k8s.prod.cd.teamdigitale.it (for the production environment)
+#
+
+resource "azurerm_public_ip" "azurerm_aks_cluster_public_ip" {
+  name                = "${local.azurerm_aks_cluster_public_ip_name}"
+  location            = "${data.azurerm_resource_group.k8s_rg.location}"
+  resource_group_name = "${local.azurerm_resource_group_aks_cluster_rg_name}"
+  allocation_method   = "Static"
+
+  tags {
+    environment = "${var.environment}"
+  }
+}
+
+output "azurerm_aks_cluster_public_ip_ip" {
+  value = "${azurerm_public_ip.azurerm_aks_cluster_public_ip.ip_address}"
+}
+
+#
 # PagoPA VPN
 # Currently enabled only for test environment
 #
@@ -1201,11 +1399,11 @@ module "pagopa_vpn" {
   resource_group_name          = "${azurerm_resource_group.azurerm_resource_group.name}"
   site_gateway_address         = "${data.azurerm_key_vault_secret.pagopa_vpn_site_gateway_ip.value}"
   vpn_shared_key               = "${data.azurerm_key_vault_secret.pagopa_vpn_shared_key.value}"
-  aks_rg_name                  = "${module.kubernetes.aks_rg_name}"
-  aks_vnet_id                  = "${module.kubernetes.aks_vnet_id}"
-  aks_vnet_name                = "${module.kubernetes.aks_vnet_name}"
-  aks_nsg_name                 = "${module.kubernetes.aks_nsg_name}"
-  aks_nodes_cidr               = "${module.kubernetes.aks_nodes_cidr}"
+  aks_rg_name                  = "${local.azurerm_resource_group_aks_cluster_rg_name}"
+  aks_nsg_name                 = "${module.aks_cluster.agents_network_security_group_name}"
+  aks_nodes_cidr               = "${var.azurerm_subnet_aks_cluster_address_prefix}"
+  aks_vnet_id                  = "${azurerm_virtual_network.azurerm_aks_cluster_vnet.id}"
+  aks_vnet_name                = "${azurerm_virtual_network.azurerm_aks_cluster_vnet.name}"
   lb_ssh_key                   = "${local.azurerm_kubernetes_admin_ssh_publickey}"
 }
 

@@ -39,7 +39,7 @@ locals {
   loadbalancer_playbook_url = "https://raw.githubusercontent.com/teamdigitale/${local.loadbalancer_playbook_repo_name}"
 
   # loadbalancer playbook archive version
-  loadbalancer_playbook_version = "0.0.15"
+  loadbalancer_playbook_version = "0.0.16"
 
   # Precompute resource names based on naming convention
   virtual_network_name                    = "${var.azurerm_resource_name_prefix}-ppa-vpn-vnet-${var.environment_short}"
@@ -323,7 +323,7 @@ resource "azurerm_virtual_network_peering" "aks_to_pagopa" {
   count = "${var.enable == "true" ? 1 : 0}"
 
   name                         = "AksToPagoPa"
-  resource_group_name          = "${var.aks_rg_name}"
+  resource_group_name          = "${var.resource_group_name}"
   virtual_network_name         = "${var.aks_vnet_name}"
   remote_virtual_network_id    = "${azurerm_virtual_network.default.id}"
   allow_virtual_network_access = "true"

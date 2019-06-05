@@ -18,7 +18,6 @@
     "https://github.com/teamdigitale/digital-citizenship-onboarding",
   "azurerm_apim_eventhub_rule": "apim-eventhub-rule",
   "azurerm_kubernetes_admin_username": "k8s-admin",
-  "azurerm_kubernetes_admin_ssh_publickey_file": "k8s_admin_key.pub",
   "default_sender_email": "IO - l’app dei servizi pubblici <no-reply@io.italia.it>",
   "azurerm_dns_main_zone": "io.italia.it",
   "azurerm_dns_main_zone_spf1": "v=spf1 include:musv.com ~all",
