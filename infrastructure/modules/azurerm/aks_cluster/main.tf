@@ -20,6 +20,7 @@
 data "azurerm_resource_group" "rg_keyvault" {
   name = "${var.azurerm_key_vault_rg}"
 }
+
 data "azurerm_resource_group" "rg" {
   name = "${local.azurerm_resource_group_name}"
 }
