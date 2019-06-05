@@ -329,6 +329,32 @@ resource "azurerm_virtual_network_peering" "aks_to_pagopa" {
   allow_virtual_network_access = "true"
 }
 
+# Peering from the pagoPA VPN VNet to the mgmt VNet
+resource "azurerm_virtual_network_peering" "pagopa_to_mgmt" {
+  name                         = "PagoPaToMgmt"
+  resource_group_name          = "${var.resource_group_name}"
+  virtual_network_name         = "${azurerm_virtual_network.default.name}"
+  remote_virtual_network_id    = "${var.mgmt_vnet_id}"
+  allow_virtual_network_access = "true"
+
+  # NOTE: due to an issue with the Azure provider, once the two mutual
+  # peerings gets created, on the next run it will attempt to recreate this
+  # one due to the changed (computed) value of remote_virtual_network_id
+  # We can safely ignore changes to remote_virtual_network_id.
+  lifecycle {
+    ignore_changes = ["remote_virtual_network_id"]
+  }
+}
+
+# Peering from the mgmt VNet to the pagoPA VPN VNet
+resource "azurerm_virtual_network_peering" "mgmt_to_pagopa" {
+  name                         = "MgmtToPagoPa"
+  resource_group_name          = "${var.resource_group_name}"
+  virtual_network_name         = "${var.mgmt_vnet_name}"
+  remote_virtual_network_id    = "${azurerm_virtual_network.default.id}"
+  allow_virtual_network_access = "true"
+}
+
 #
 # Network security rules for AKS agent nodes
 #
