@@ -827,39 +827,7 @@ resource "null_resource" "azurerm_function_app_git" {
   }
 }
 
-locals {
-  application_outbound_ips = "${var.azurerm_shared_address_space_cidr},${azurerm_function_app.azurerm_function_app.outbound_ip_addresses},${var.azurerm_azure_portal_ips}"
-}
-
-resource "null_resource" "azurerm_cosmosdb_ip_range_filter" {
-  triggers = {
-    cosmosdb_id              = "${azurerm_cosmosdb_account.azurerm_cosmosdb.id}"
-    application_outbound_ips = "${local.application_outbound_ips}"
-
-    # increment the following value when changing the provisioner script to
-    # trigger the re-execution of the script
-    # TODO: consider using the hash of the script content instead
-    provisioner_version = "1"
-  }
-
-  provisioner "local-exec" {
-    command = "${join(" ", list(
-      "ts-node ${var.cosmosdb_iprange_provisioner}",
-      "--resource-group-name ${azurerm_resource_group.azurerm_resource_group.name}",
-      "--cosmosdb-name ${azurerm_cosmosdb_account.azurerm_cosmosdb.name}",
-      "--ips ${local.application_outbound_ips}"))
-    }"
-
-    environment = {
-      ENVIRONMENT = "${var.environment}"
-      TF_VAR_ADB2C_TENANT_ID = "${var.ADB2C_TENANT_ID}"
-      TF_VAR_DEV_PORTAL_CLIENT_ID = "${data.azurerm_key_vault_secret.dev_portal_client_id.value}"
-      TF_VAR_DEV_PORTAL_CLIENT_SECRET = "${data.azurerm_key_vault_secret.dev_portal_client_secret.value}"
-    }
-  }
-}
-
-TODO: assign role to the MSI to let the App Service access API Management users
+# TODO: assign role to the MSI to let the App Service access API Management users
 resource "azurerm_virtual_machine_extension" "app_service_portal_msi" {
     name                 = "app_service_portal_msi"
     location            = "${azurerm_resource_group.azurerm_resource_group.location}"
