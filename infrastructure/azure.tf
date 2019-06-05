@@ -1508,11 +1508,12 @@ output "mgmt_virtual_machine_ssh_username" {
   value = "${module.mgmt_virtual_machine.azurerm_virtual_machine_os_profile_admin_username}"
 }
 
+# Peering from management network to the AKS cluster vnet
 resource "azurerm_virtual_network_peering" "mgmt_to_aks" {
   name                         = "MgmtToAks"
   resource_group_name          = "${azurerm_resource_group.azurerm_resource_group.name}"
   virtual_network_name         = "${azurerm_virtual_network.mgmt_vnet.name}"
-  remote_virtual_network_id    = "${module.kubernetes.aks_vnet_id}"
+  remote_virtual_network_id    = "${azurerm_virtual_network.azurerm_aks_cluster_vnet.id}"
   allow_virtual_network_access = "true"
 
   lifecycle {
@@ -1520,11 +1521,11 @@ resource "azurerm_virtual_network_peering" "mgmt_to_aks" {
   }
 }
 
-# Peering from the old AKS agent VNet to the Redis Cache VNet
+# Peering from AKS cluster vnet to the management network
 resource "azurerm_virtual_network_peering" "aks_to_mgmt" {
   name                         = "AksToMgmt"
-  resource_group_name          = "${module.kubernetes.aks_rg_name}"
-  virtual_network_name         = "${module.kubernetes.aks_vnet_name}"
+  resource_group_name          = "${azurerm_resource_group.azurerm_resource_group.name}"
+  virtual_network_name         = "${azurerm_virtual_network.azurerm_aks_cluster_vnet.name}"
   remote_virtual_network_id    = "${azurerm_virtual_network.mgmt_vnet.id}"
   allow_virtual_network_access = "true"
 }
