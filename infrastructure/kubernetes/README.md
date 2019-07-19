@@ -9,12 +9,20 @@ by Terraform.
 ## Prerequisites
 
   1. Install and setup `kubectl`
-  1. Configure the K8S cluster credentials (`az aks get-credentials --admin`).
+  2. Ensure you are in the **TTD - IO** directory (`az account list`)
+  3. Make sure you're on the correct azure subscription (az account set -s YOUR-SUBSCRIPTION)
+  1. Configure the K8S cluster credentials (`az aks get-credentials --admin -n AKS_CLUSTER_NAME -g RESOURCE_GROUP`).
   1. Install and configure [Helm](https://helm.sh/) (the package manager for
      Kubernetes) properly configured for your cluster (see
      the below)
   1. [Switch the context](https://kubernetes-v1-4.github.io/docs/user-guide/kubectl/kubectl_config_use-context/)
      for the environment you want to work on (e.g. `test` or `production`).
+
+	You may have more than one cluster configuration on your computer.
+
+	To see your contexts: `kubectl config get-contexts`
+
+	To use your context: `kubectl config use-context CONTEXT_NAME`
 
 ## Configuring resources
 
