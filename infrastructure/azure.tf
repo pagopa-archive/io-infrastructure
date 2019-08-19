@@ -409,6 +409,7 @@ locals {
   azurerm_cosmosdb_documentdb_name          = "${var.azurerm_resource_name_prefix}-documentdb-${var.environment_short}"
   azurerm_app_service_plan_name             = "${var.azurerm_resource_name_prefix}-app-${var.environment_short}"
   azurerm_functionapp_name                  = "${var.azurerm_resource_name_prefix}-functions-${var.environment_short}"
+  azurerm_functionapp_services_name         = "${var.azurerm_resource_name_prefix}-functions-services-${var.environment_short}"
   azurerm_functionapp_storage_account_name  = "${var.azurerm_resource_name_prefix}funcstorage${var.environment_short}"
   azurerm_application_insights_name         = "${var.azurerm_resource_name_prefix}-appinsights-${var.environment_short}"
   azurerm_log_analytics_name                = "${var.azurerm_resource_name_prefix}-loganalytics-${var.environment_short}"
@@ -816,6 +817,65 @@ resource "null_resource" "azurerm_function_app_git" {
   }
 }
 
+resource "azurerm_function_app" "azurerm_function_app_services" {
+  name                      = "${local.azurerm_functionapp_services_name}"
+  location                  = "${azurerm_resource_group.azurerm_resource_group.location}"
+  resource_group_name       = "${azurerm_resource_group.azurerm_resource_group.name}"
+  app_service_plan_id       = "${azurerm_app_service_plan.azurerm_app_service_plan.id}"
+  storage_connection_string = "${azurerm_storage_account.azurerm_functionapp_storage_account.primary_connection_string}"
+  client_affinity_enabled   = false
+  version                   = "~2"
+
+  https_only                = true
+  enable_builtin_logging    = true
+
+  app_settings = {
+    # "AzureWebJobsStorage" = "${azurerm_storage_account.azurerm_functionapp_storage_account.primary_connection_string}"
+
+    "COSMOSDB_NAME" = "${local.azurerm_cosmosdb_documentdb_name}"
+
+    "QueueStorageConnection" = "${azurerm_storage_account.azurerm_storage_account.primary_connection_string}"
+
+    "APPINSIGHTS_INSTRUMENTATIONKEY" = "${azurerm_application_insights.azurerm_application_insights.instrumentation_key}"
+
+    # Avoid edit functions code from the Azure portal
+    "FUNCTION_APP_EDIT_MODE" = "readonly"
+
+    "WEBSITE_NODE_DEFAULT_VERSION" = "10.14.1"
+
+    # needed for deploying with functions core tools cli
+    "WEBSITE_RUN_FROM_PACKAGE" = "1"
+
+    "MESSAGE_CONTAINER_NAME" = "${azurerm_storage_blob.azurerm_message_blob.name}"
+
+    "MAILUP_USERNAME" = "${data.azurerm_key_vault_secret.mailup_username.value}"
+
+    "MAILUP_SECRET" = "${data.azurerm_key_vault_secret.mailup_secret.value}"
+
+    "MAIL_FROM_DEFAULT" = "${var.default_sender_email}"
+
+    "WEBHOOK_CHANNEL_URL" = "${var.webhook_channel_url}${data.azurerm_key_vault_secret.webhook_channel_url_token.value}"
+
+    "PUBLIC_API_URL" = "${coalesce(var.functions_public_api_url, local.default_functions_public_api_url)}"
+
+    # API management API-Key (Ocp-Apim-Subscription-Key)
+    "PUBLIC_API_KEY" = "${data.azurerm_key_vault_secret.functions_public_api_key.value}"
+  }
+
+  connection_string = [
+    {
+      name  = "COSMOSDB_KEY"
+      type  = "Custom"
+      value = "${azurerm_cosmosdb_account.azurerm_cosmosdb.primary_master_key}"
+    },
+    {
+      name  = "COSMOSDB_URI"
+      type  = "Custom"
+      value = "https://${azurerm_cosmosdb_account.azurerm_cosmosdb.name}.documents.azure.com:443/"
+    }
+  ]
+}
+
 # Logging (OSM)
 
 resource "azurerm_log_analytics_workspace" "azurerm_log_analytics" {
@@ -907,7 +967,7 @@ module "azurerm_apim_internal" {
   resource_group_name  = "${azurerm_resource_group.azurerm_resource_group.name}"
   virtualNetworkType   = "external"
 
-  # virtualNetworkConfiguration = 
+  # virtualNetworkConfiguration =
   # service_principal_client_id     = "${data.azurerm_client_config.current.client_id}"
   # service_principal_client_secret = "${var.ARM_CLIENT_SECRET}"
   provisioner_version = "3"
