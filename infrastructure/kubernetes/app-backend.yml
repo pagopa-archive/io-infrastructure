@@ -28,7 +28,7 @@ spec:
         app: app-backend
     spec:
       containers:
-      - image: "teamdigitale/italia-backend:v1.7.1"
+      - image: "teamdigitale/italia-backend:v1.7.3"
         name: app-backend
         ports:
         - name: http-port
@@ -41,12 +41,12 @@ spec:
         - name: "API_BASE_PATH"
           value: "/api/v1"
         - name: "API_URL"
-          value: "https://api.cd.italia.it/api/v1"
+          value: "https://agid-functions-app-test.azurewebsites.net/api/v1"
         - name: "API_KEY"
           valueFrom:
             secretKeyRef:
               name: app-backend-secrets
-              key: api_key
+              key: api_v2_key
         - name: "AUTHENTICATION_BASE_PATH"
           value: ""
         - name: "AZURE_NH_ENDPOINT"
