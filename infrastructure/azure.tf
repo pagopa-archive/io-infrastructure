@@ -862,6 +862,10 @@ resource "azurerm_function_app" "azurerm_function_app_services" {
     "MAIL_FROM_DEFAULT" = "${var.default_sender_email}"
 
     "WEBHOOK_CHANNEL_URL" = "${var.webhook_channel_url}${data.azurerm_key_vault_secret.webhook_channel_url_token.value}"
+
+    # Enable improved autoscaling algorithm
+    # see https://www.azurefromthetrenches.com/azure-functions-significant-improvements-in-http-trigger-scaling/
+    "WEBSITE_HTTPSCALEV2_ENABLED" = "1"
   }
 
   connection_string = [
@@ -919,6 +923,10 @@ resource "azurerm_function_app" "azurerm_function_app_app" {
 
     # API management API-Key (Ocp-Apim-Subscription-Key)
     "PUBLIC_API_KEY" = "${data.azurerm_key_vault_secret.functions_public_api_key.value}"
+
+    # Enable improved autoscaling algorithm
+    # see https://www.azurefromthetrenches.com/azure-functions-significant-improvements-in-http-trigger-scaling/
+    "WEBSITE_HTTPSCALEV2_ENABLED" = "1"
   }
 
   connection_string = [
