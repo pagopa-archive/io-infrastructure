@@ -700,8 +700,9 @@ resource "azurerm_app_service_plan" "azurerm_app_service_plan" {
   location            = "${azurerm_resource_group.azurerm_resource_group.location}"
   resource_group_name = "${azurerm_resource_group.azurerm_resource_group.name}"
 
+  maximum_elastic_worker_count = "4"
   sku {
-    tier = "Standard"
+    tier = "Dynamic"
 
     # see https://azure.microsoft.com/en-en/pricing/details/app-service/
     size = "S1"
