@@ -197,6 +197,11 @@ variable "default_sender_email" {
   description = "Default sender email address"
 }
 
+variable "subscriptions_feed_table_name" {
+  default     = "SubscriptionsFeedByDay"
+  description = "Table name for subscriptions feed data"
+}
+
 # Kubernetes (AKS) module variables - start
 
 variable "azurerm_key_vault_rg" {
@@ -864,6 +869,8 @@ resource "azurerm_function_app" "azurerm_function_app_services" {
 
     "WEBHOOK_CHANNEL_URL" = "${var.webhook_channel_url}${data.azurerm_key_vault_secret.webhook_channel_url_token.value}"
 
+    "SUBSCRIPTIONS_FEED_TABLE" = "${var.subscriptions_feed_table_name}"
+
     # Enable improved autoscaling algorithm
     # see https://www.azurefromthetrenches.com/azure-functions-significant-improvements-in-http-trigger-scaling/
     "WEBSITE_HTTPSCALEV2_ENABLED" = "1"
@@ -924,6 +931,8 @@ resource "azurerm_function_app" "azurerm_function_app_app" {
 
     # API management API-Key (Ocp-Apim-Subscription-Key)
     "PUBLIC_API_KEY" = "${data.azurerm_key_vault_secret.functions_public_api_key.value}"
+
+    "SUBSCRIPTIONS_FEED_TABLE" = "${var.subscriptions_feed_table_name}"
 
     # Enable improved autoscaling algorithm
     # see https://www.azurefromthetrenches.com/azure-functions-significant-improvements-in-http-trigger-scaling/
