@@ -28,7 +28,7 @@ spec:
         app: app-backend
     spec:
       containers:
-      - image: "teamdigitale/italia-backend:v1.9.0"
+      - image: "teamdigitale/italia-backend:v2.0.1"
         name: app-backend
         ports:
         - name: http-port
