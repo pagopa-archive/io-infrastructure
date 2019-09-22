@@ -79,6 +79,12 @@ variable "azurerm_storage_queue_profileevents" {
   description = "Name of the storage queue for profile events (create / update)"
 }
 
+variable "azurerm_storage_container_cached" {
+  type        = "string"
+  default     = "cached"
+  description = "Name of the storage container for cached data"
+}
+
 variable "storage_account_bd_name" {
   description = "The suffix used to identify the specific Azure storage account"
 }
@@ -602,6 +608,15 @@ resource "azurerm_storage_queue" "azurerm_storage_queue_profileevents" {
   storage_account_name = "${azurerm_storage_account.azurerm_storage_account.name}"
 }
 
+## CONTAINERS
+
+resource "azurerm_storage_container" "azurerm_storage_container_cached" {
+  name                  = "${var.azurem_storage_container_cached}"
+  resource_group_name   = "${azurerm_resource_group.azurerm_resource_group.name}"
+  storage_account_name  = "${azurerm_storage_account.azurerm_storage_account.name}"
+  container_access_type = "private"
+}
+
 ## BLOBS
 
 resource "azurerm_storage_blob" "azurerm_message_blob" {
@@ -861,6 +876,8 @@ resource "azurerm_function_app" "azurerm_function_app_admin" {
     # Enable improved autoscaling algorithm
     # see https://www.azurefromthetrenches.com/azure-functions-significant-improvements-in-http-trigger-scaling/
     "WEBSITE_HTTPSCALEV2_ENABLED" = "1"
+
+    "StorageConnection" = "${azurerm_storage_account.azurerm_storage_account.primary_connection_string}"
   }
 
   connection_string = [
