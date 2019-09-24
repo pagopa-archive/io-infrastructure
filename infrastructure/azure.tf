@@ -611,7 +611,7 @@ resource "azurerm_storage_queue" "azurerm_storage_queue_profileevents" {
 ## CONTAINERS
 
 resource "azurerm_storage_container" "azurerm_storage_container_cached" {
-  name                  = "${var.azurem_storage_container_cached}"
+  name                  = "${var.azurerm_storage_container_cached}"
   resource_group_name   = "${azurerm_resource_group.azurerm_resource_group.name}"
   storage_account_name  = "${azurerm_storage_account.azurerm_storage_account.name}"
   container_access_type = "private"
