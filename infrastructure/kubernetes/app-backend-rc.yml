@@ -28,7 +28,7 @@ spec:
         app: app-backend-rc
     spec:
       containers:
-      - image: "teamdigitale/italia-backend:v2.1.0"
+      - image: "teamdigitale/italia-backend:v2.1.2"
         name: app-backend-rc
         ports:
         - name: http-port
@@ -93,6 +93,8 @@ spec:
           value: "https://registry.spid.gov.it/metadata/idp/spid-entities-idps.xml"
         - name: "IDP_METADATA_REFRESH_INTERVAL_SECONDS"
           value: "864000" # 10 days
+        - name: "APPINSIGHTS_INSTRUMENTATIONKEY"
+          value: "cafdda95-5610-4b7a-b642-97375082cedd" # not a secret
         volumeMounts:
           - name: certs
             mountPath: "/usr/src/app/certs"
