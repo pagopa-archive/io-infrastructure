@@ -449,6 +449,8 @@ locals {
   azurerm_resource_group_aks_cluster_rg_name = "MC_${local.azurerm_resource_group_name}_${local.azurerm_aks_cluster_name}_${var.location}"
 
   default_functions_public_api_url           = "https://${local.azurerm_apim_name}.azure-api.net/"
+
+  backend_url                                = "https://app-backend.k8s.${var.environment_short}.cd.teamdigitale.it"
 }
 
 #
@@ -1063,7 +1065,7 @@ resource "azurerm_function_app" "azurerm_function_app_public" {
 
     "StorageConnection" = "${azurerm_storage_account.azurerm_storage_account.primary_connection_string}"
 
-    "VALIDATION_CALLBACK_URL" = "https://app-backend.k8s.test.cd.teamdigitale.it/email_verification.html"
+    "VALIDATION_CALLBACK_URL" = "${local.backend_url}/email_verification.html"
   }
 
   connection_string = [
