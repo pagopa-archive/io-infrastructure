@@ -423,6 +423,7 @@ locals {
   azurerm_functionapp_admin_name            = "${var.azurerm_resource_name_prefix}-functions-admin-${var.environment_short}"
   azurerm_functionapp_services_name         = "${var.azurerm_resource_name_prefix}-functions-services-${var.environment_short}"
   azurerm_functionapp_app_name              = "${var.azurerm_resource_name_prefix}-functions-app-${var.environment_short}"
+  azurerm_functionapp_public_name           = "${var.azurerm_resource_name_prefix}-functions-public-${var.environment_short}"
   azurerm_functionapp_storage_account_name  = "${var.azurerm_resource_name_prefix}funcstorage${var.environment_short}"
   azurerm_application_insights_name         = "${var.azurerm_resource_name_prefix}-appinsights-${var.environment_short}"
   azurerm_log_analytics_name                = "${var.azurerm_resource_name_prefix}-loganalytics-${var.environment_short}"
@@ -448,6 +449,8 @@ locals {
   azurerm_resource_group_aks_cluster_rg_name = "MC_${local.azurerm_resource_group_name}_${local.azurerm_aks_cluster_name}_${var.location}"
 
   default_functions_public_api_url           = "https://${local.azurerm_apim_name}.azure-api.net/"
+
+  backend_url                                = "https://app-backend.k8s.${var.environment_short}.cd.teamdigitale.it"
 }
 
 #
@@ -1007,6 +1010,62 @@ resource "azurerm_function_app" "azurerm_function_app_app" {
     # Enable improved autoscaling algorithm
     # see https://www.azurefromthetrenches.com/azure-functions-significant-improvements-in-http-trigger-scaling/
     "WEBSITE_HTTPSCALEV2_ENABLED" = "1"
+  }
+
+  connection_string = [
+    {
+      name  = "COSMOSDB_KEY"
+      type  = "Custom"
+      value = "${azurerm_cosmosdb_account.azurerm_cosmosdb.primary_master_key}"
+    },
+    {
+      name  = "COSMOSDB_URI"
+      type  = "Custom"
+      value = "https://${azurerm_cosmosdb_account.azurerm_cosmosdb.name}.documents.azure.com:443/"
+    }
+  ]
+}
+
+resource "azurerm_function_app" "azurerm_function_app_public" {
+  name                      = "${local.azurerm_functionapp_public_name}"
+  location                  = "${azurerm_resource_group.azurerm_resource_group.location}"
+  resource_group_name       = "${azurerm_resource_group.azurerm_resource_group.name}"
+  app_service_plan_id       = "${azurerm_app_service_plan.azurerm_app_service_plan.id}"
+  storage_connection_string = "${azurerm_storage_account.azurerm_functionapp_storage_account.primary_connection_string}"
+  client_affinity_enabled   = false
+  version                   = "~2"
+
+  https_only                = true
+  enable_builtin_logging    = true
+
+  site_config = {
+    # We don't want the express server to idle
+    # so do not set `alwaysOn: false` in production
+    always_on = true
+  }
+
+  app_settings = {
+    # "AzureWebJobsStorage" = "${azurerm_storage_account.azurerm_functionapp_storage_account.primary_connection_string}"
+
+    # Avoid edit functions code from the Azure portal
+    "FUNCTION_APP_EDIT_MODE" = "readonly"
+
+    "WEBSITE_NODE_DEFAULT_VERSION" = "10.14.1"
+
+    # Needed for deploying with functions core tools cli
+    "WEBSITE_RUN_FROM_PACKAGE" = "1"
+
+    # Enable improved autoscaling algorithm
+    # see https://www.azurefromthetrenches.com/azure-functions-significant-improvements-in-http-trigger-scaling/
+    "WEBSITE_HTTPSCALEV2_ENABLED" = "1"
+
+    "APPINSIGHTS_INSTRUMENTATIONKEY" = "${azurerm_application_insights.azurerm_application_insights.instrumentation_key}"
+
+    "COSMOSDB_NAME" = "${local.azurerm_cosmosdb_documentdb_name}"
+
+    "StorageConnection" = "${azurerm_storage_account.azurerm_storage_account.primary_connection_string}"
+
+    "VALIDATION_CALLBACK_URL" = "${local.backend_url}/email_verification.html"
   }
 
   connection_string = [
