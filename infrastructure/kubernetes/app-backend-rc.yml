@@ -28,7 +28,7 @@ spec:
         app: app-backend-rc
     spec:
       containers:
-      - image: "teamdigitale/italia-backend:v2.1.2"
+      - image: "teamdigitale/italia-backend:v2.5.2"
         name: app-backend-rc
         ports:
         - name: http-port
@@ -41,21 +41,22 @@ spec:
         - name: "API_BASE_PATH"
           value: "/api/v1"
         - name: "API_URL"
-          value: "https://agid-functions-app-test.azurewebsites.net/api/v1"
+          value: "https://io-prod-fn-2-app.azurewebsites.net/api/v1"
         - name: "API_KEY"
           valueFrom:
             secretKeyRef:
-              name: app-backend-secrets
+              name: app-backend-rc-secrets
+              # The default host key of fn app app (from function app settings)
               key: api_v2_key
         - name: "AUTHENTICATION_BASE_PATH"
           value: ""
         - name: "AZURE_NH_ENDPOINT"
           valueFrom:
             secretKeyRef:
-              name: app-backend-secrets
+              name: app-backend-rc-secrets
               key: azure_nh_endpoint
         - name: "AZURE_NH_HUB_NAME"
-          value: "agid-notificationhub-test"
+          value: "io-prod-nh-nh-01"
         - name: "NODE_ENV"
           value: "development"
         - name: "PAGOPA_BASE_PATH"
@@ -67,7 +68,8 @@ spec:
         - name: "PRE_SHARED_KEY"
           valueFrom:
             secretKeyRef:
-              name: app-backend-secrets
+              name: app-backend-rc-secrets
+              # this is the suffix of the webhook channel url in function app services
               key: pre_shared_key
         - name: "REDIS_URL"
           value: "agid-redis-test.redis.cache.windows.net"
@@ -76,12 +78,13 @@ spec:
         - name: "REDIS_PASSWORD"
           valueFrom:
             secretKeyRef:
-              name: app-backend-secrets
+              name: app-backend-rc-secrets
+              # Primary redis access key
               key: redis_password
         - name: "SAML_CALLBACK_URL"
-          value: "https://app-backend.k8s.test.cd.teamdigitale.it/assertionConsumerService"
+          value: "https://app-backend-rc.k8s.test.cd.teamdigitale.it/assertionConsumerService"
         - name: "SAML_ISSUER"
-          value: "https://spid.agid.gov.it/cd"
+          value: "app-backend-rc"
         - name: "SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX"
           value: "0"
         - name: "SPID_TESTENV_URL"
@@ -94,7 +97,7 @@ spec:
         - name: "IDP_METADATA_REFRESH_INTERVAL_SECONDS"
           value: "864000" # 10 days
         - name: "APPINSIGHTS_INSTRUMENTATIONKEY"
-          value: "cafdda95-5610-4b7a-b642-97375082cedd" # not a secret
+          value: "a4e8f403-80f5-47da-a4a3-85490acc9c3b" # not a secret
         volumeMounts:
           - name: certs
             mountPath: "/usr/src/app/certs"
