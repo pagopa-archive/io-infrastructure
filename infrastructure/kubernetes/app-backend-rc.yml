@@ -72,7 +72,7 @@ spec:
               # this is the suffix of the webhook channel url in function app services
               key: pre_shared_key
         - name: "REDIS_URL"
-          value: "io-prod-redis-cache-01.redis.cache.windows.net"
+          value: "agid-redis-test.redis.cache.windows.net"
         - name: "REDIS_PORT"
           value: "6380"
         - name: "REDIS_PASSWORD"
@@ -84,7 +84,7 @@ spec:
         - name: "SAML_CALLBACK_URL"
           value: "https://app-backend-rc.k8s.test.cd.teamdigitale.it/assertionConsumerService"
         - name: "SAML_ISSUER"
-          value: "https://spid.agid.gov.it/cd"
+          value: "app-backend-rc"
         - name: "SAML_ATTRIBUTE_CONSUMING_SERVICE_INDEX"
           value: "0"
         - name: "SPID_TESTENV_URL"

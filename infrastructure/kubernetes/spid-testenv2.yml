@@ -18,11 +18,9 @@ data:
     # Service provider configuration
     #
     metadata:
-      local:
-        - "/app/conf/sp_metadata.xml"
-    # remote:
-    #  - url: "http://spid-sp/metadata
-    #  cert: "./conf/spid-sp.cert"
+      remote:
+        - url: "https://app-backend.k8s.test.cd.teamdigitale.it/metadata"
+        - url: "https://app-backend-rc.k8s.test.cd.teamdigitale.it/metadata"
 
     #
     # Web server configuration
