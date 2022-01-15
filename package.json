@@ -53,7 +53,7 @@
     "readline-sync": "^1.4.9",
     "replace-in-file": "^4.0.0",
     "request": "^2.87.0",
-    "shelljs": "^0.8.2",
+    "shelljs": "^0.8.5",
     "tmp": "^0.0.33",
     "ts-node": "^7.0.0",
     "tslint": "^5.10.0",
